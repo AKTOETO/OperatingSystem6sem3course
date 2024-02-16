@@ -3,6 +3,9 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <dirent.h>
+#include <string.h>
+
 #include <memory>
 
 // открытие файла, из которого читаем
@@ -126,17 +129,9 @@ pFile readInputFile(const char* path)
     return f;
 }
 
-
-int main(int argc, char** argv)
+// функция тестирования работоспособности readInputFile
+void testReadInputFile(int argc, char** argv)
 {
-    // получение пути к файлу, который надо считтать, 
-    // через аргументы argv
-    if(argc < 2)
-    {
-        printf("Недостаточно аргументов (нужен еще путь к файлу)\n");
-        return 1;
-    }
-
     // путь к файлу, который будем читать
     const char* file_path = argv[1];
     // входной и выходной файл
@@ -153,6 +148,77 @@ int main(int argc, char** argv)
 
     close(in->m_id);
     close(out);
+}
+
+// печать каталога
+void printDir(const char* path, int depth)
+{
+    //поток каталога
+    DIR* dir;
+
+    // элемент каталога
+    dirent* entry;
+
+    // для сборки информации
+    struct stat statbuf;
+
+    // пытаемся открыть каталог
+    if((dir = opendir(path)) == NULL)
+    {
+        fprintf(stderr, "Директория %s не была открыта", path);
+        return;
+    }
+
+    // переходим в открытую директорию
+    chdir(path);
+
+    // проходимся по всем элементам этой директории
+    while((entry = readdir(dir)) != NULL)
+    {
+        // получение справочной информации о текущем элементе каталога
+        lstat(entry->d_name, &statbuf);
+
+        // если текущий элемент - каталог
+        if(S_ISDIR(statbuf.st_mode))
+        {
+            // игнорируем каталоги "." и ".."
+            if(strcmp(".",entry->d_name) == 0 ||
+               strcmp("..", entry->d_name) == 0)
+                continue;
+            
+            printf("%*s%s/\n", depth, " ", entry->d_name);
+
+            // вызываем рекурсивную печать от текущего каталога
+            printDir(entry->d_name, depth+4);
+        }
+        // если же это файл
+        else
+        {
+            printf("%*s%s\n", depth, " ", entry->d_name);
+        }
+    }
+
+    // переходим в директорию выше
+    chdir("..");
+
+    // закрываем поток каталога
+    closedir(dir);
+}
+
+int main(int argc, char** argv)
+{
+    // получение пути к файлу, который надо считать, 
+    // через аргументы argv
+    if(argc < 2)
+    {
+        printf("Недостаточно аргументов (нужен еще путь к файлу)\n");
+        return 1;
+    }
+
+    // testReadInputFile(argc, argv);
+    
+    printDir(argv[1], 0);
+    
 
     return 0;
 }
