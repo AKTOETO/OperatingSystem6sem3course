@@ -1,187 +1,114 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <filesystem>
-#include <list>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <stdio.h>
 
-using namespace std::filesystem;
-
-std::string GetFileInfo(const std::string& filepath, size_t size)
+// открытие файла, из которого читаем
+int openInputFile(const char* path)
 {
-    std::ifstream fin(filepath);
-    char* out = new char[size];
-    fin.read(out, size);
-    std::string strout(out, size);
-    delete[] out;
-    return strout;
+    // открытие файла
+    int in = open(path, O_RDONLY);
+
+    // если файл не был открыт
+    if(in == -1)
+    {
+        printf("Файл %s не был открыт\n", path);
+        exit(-1);
+    }
+
+    printf("Файл %s открыт\n", path);
+
+    return in;
 }
 
-std::string GetSubString(std::istream& in, size_t size)
+// открытие файла, в который пишем
+int openOutputFile(const char* path)
 {
-    char* out = new char[size];
-    in.read(out, size);
-    std::string str(out, size);
-    delete[] out;
-    return str;
+    // открытие файла
+    int out = open(path, O_WRONLY|O_TRUNC|O_CREAT, S_IRUSR|S_IWUSR);
+
+    // если файл не был открыт
+    if(out == -1)
+    {
+        printf("Файл %s не был открыт\n", path);
+        exit(-1);
+    }
+        
+    printf("Файл %s открыт\n", path);
+
+    return out;
 }
 
-int Archivate(int argc, char** argv)
+// определение ращмера файла
+int getFileSize(int file)
 {
-    // если нет дополнительных аргументов
-    // выдаем ошибку
-    if(argc < 3)
-    {
-        std::cerr << "Мало аргументов\n";
-        return 1;
-    }
+    // определение размера файла
+    int file_size = lseek(file, 0, SEEK_END);
+    printf("Размер файла %d\n", file_size);
+    
+    // ставим курсор в начало файла
+    lseek(file, 0, SEEK_SET);
 
-    // сохраняем путь к директории, которую надо заархивировать
-    std::string arch_str(argv[1]);
-    std::cout << "Директория для архивации: " << arch_str << "\n";
-
-    // сохраняем путь к директории, в котороую нужно
-    // положить заархивированный файл
-    std::string dearch_str(argv[2]);
-    std::cout << "Директория после архивации: " << dearch_str << "\n";
-
-    // проверяем, существует ли такая директория
-    if(!exists(arch_str))
-    {
-        std::cerr << "Такая директория не существует\n";
-        return 2;
-    }
-
-    // проверяем директория ли это
-    if(!is_directory(arch_str))
-    {
-        std::cerr<<"Это не директория\n";
-        return 3;
-    }
-
-    // количество файлов
-    size_t num_of_file = 0;
-
-    // получаем список файлов в директории
-    for (auto& entry : recursive_directory_iterator(arch_str)) 
-    {
-        // если это файл
-        if (!is_directory(entry.path()))
-        {
-            // печатаем в консоль путь к файлу и его размер
-            std::cout << entry.path() << 
-            "\t" << entry.file_size() << "\n";
-            num_of_file++;
-        }
-    }
-
-    // создаем выходной файл для архивации
-    std::ofstream fout(dearch_str, std::ios::binary);
-
-    // выводим количество файлов
-    fout << num_of_file << "\n";
-
-    // вся информация из файлов
-    std::string all_data;
-    // весь размер информации файлов
-    size_t all_size = 0;
-
-    // выводим информацию по файлам
-    for (auto& entry : recursive_directory_iterator(arch_str)) 
-    {
-        // если это файл
-        if (!is_directory(entry.path()))
-        {
-            // печатаем в файл путь к файлу и его размер
-            fout << entry.path() << "\n"
-                 << entry.file_size() << "\n";
-            all_data += GetFileInfo(entry.path().string(), entry.file_size());
-            all_size += entry.file_size();
-        }
-    }
-
-    // выводим информацию из файлов
-    fout.write(all_data.c_str(), all_size);
-    fout.close();
-
-    return 0;
+    return file_size;
 }
 
-struct file
+// создание блока для считывания файла
+char* createBlock(int size)
 {
-    std::string name;
-    size_t size;
-};
+    // блок для считывания файла
+    char* block = new char[size + 1];
+    block[size] = '\0';
+    return block;
+}
 
+// копирование файла в выделенный блок
+int copyFileToBlock(int file, char* block, int size)
+{
+    // количество считанных байт
+    int read_size = 0;
+
+    // поблочное копирование файла
+    read_size = read(file, block, size);
+    
+    printf("Считанный блок данных в %d байт:\n %s \n", read_size, block);
+
+    return read_size;
+}
 
 int main(int argc, char** argv)
 {
-    //Archivate(argc, argv);
-
-    // если нет дополнительных аргументов
-    // выдаем ошибку
+    // получение пути к файлу, который надо считтать, 
+    // через аргументы argv
     if(argc < 2)
     {
-        std::cerr << "Мало аргументов\n";
+        printf("Недостаточно аргументов (нужен еще путь к файлу)\n");
         return 1;
     }
 
-    // сохраняем путь к файлу-архиву
-    std::string arch_str(argv[1]);
-    std::cout << "Путь к архиву: " << arch_str << "\n";
+    // путь к файлу, который будем читать
+    char* file_path = argv[1];
+    // входной и выходной файл
+    int in, out;
 
-    // проверяем, существует ли такая директория
-    if(!exists(arch_str))
-    {
-        std::cerr << "Такая директория не существует\n";
-        return 2;
-    }
+    // открытие файла
+    in = openInputFile(file_path);
+    out = openOutputFile("file.out");
 
-    // проверяем директория ли это
-    if(is_directory(arch_str))
-    {
-        std::cerr<<"Это директория, а должен быть файл\n";
-        return 3;
-    }
+    // определение размера файла
+    int file_size = getFileSize(in);
 
-    // открываем файл
-    std::ifstream fin(arch_str, std::ios::binary);
+    // блок для считывания файла
+    char* block = createBlock(file_size);
 
-    // количество файлов
-    size_t num_of_file = 0;
+    // копируем информацию из блока в файл
+    copyFileToBlock(in, block, file_size);
 
-    // считываем количество файлов
-    fin >> num_of_file;
-    fin.ignore(1000000,'\n');
-    std::cout<<"Количество файлов: "<<num_of_file << "\n";
+    // печатаем всю информацию из блока в выходной файл
+    write(out, block, file_size);
 
-    // создаем список файлов
-    std::list<file> files;
-    for(size_t i = 0; i < num_of_file; i++)
-    {
-        //fin.ignore('\n', 1);
-        std::string temp;
-        file f;
-        getline(fin, f.name);
-        fin >> f.size;
-        files.emplace_back(f);
-        fin.ignore(1000000,'\n');
-        std::cout<<"\tфайл: \""<<f.name<<"\" "<<f.size<<"\n";
-    }
-
-    // печать в файлы
-    for(auto& el : files)
-    {
-        std::ofstream fout(el.name, std::ios::binary);
-        if(!fout.is_open())
-        {
-            std::cout<<"Файл не был открыт " << el.name <<"\n";
-            return 1;
-        }
-        fout.write(GetSubString(fin, el.size).c_str(), el.size);
-        fout.close();
-    }
-
+    // чистка памяти
+    delete[] block;
 
     return 0;
 }
