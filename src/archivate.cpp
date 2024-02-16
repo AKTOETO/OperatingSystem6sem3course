@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <memory>
 
 // открытие файла, из которого читаем
 int openInputFile(const char* path)
@@ -76,6 +77,56 @@ int copyFileToBlock(int file, char* block, int size)
     return read_size;
 }
 
+// структура файла
+struct file
+{
+    // идентификатор файла
+    int m_id;
+
+    // путь к файлу
+    const char* m_path;
+
+    // информация в нем
+    char* m_buffer;
+
+    // размер буфера
+    int m_size;
+
+    file(const char* _path):
+    m_id(-1), m_path(_path), m_buffer(nullptr), m_size(0)
+    {}
+
+    ~file()
+    {
+        //delete[] m_path;
+        delete[] m_buffer;
+    }
+};
+
+using pFile = std::unique_ptr<file>;
+
+// чтение файла
+pFile readInputFile(const char* path)
+{
+    // создаем файл
+    pFile f = std::make_unique<file>(path);
+
+    // открытие файла
+    f->m_id = openInputFile(path);
+
+    // определение размера файла
+    f->m_size = getFileSize(f->m_id);
+
+    // блок для считывания файла
+    f->m_buffer = createBlock(f->m_size);
+
+    // копируем информацию из блока в файл
+    copyFileToBlock(f->m_id, f->m_buffer, f->m_size);
+
+    return f;
+}
+
+
 int main(int argc, char** argv)
 {
     // получение пути к файлу, который надо считтать, 
@@ -87,28 +138,21 @@ int main(int argc, char** argv)
     }
 
     // путь к файлу, который будем читать
-    char* file_path = argv[1];
+    const char* file_path = argv[1];
     // входной и выходной файл
-    int in, out;
+    int out;
+
+    // создание входного файла
+    pFile in = readInputFile(file_path);
 
     // открытие файла
-    in = openInputFile(file_path);
     out = openOutputFile("file.out");
 
-    // определение размера файла
-    int file_size = getFileSize(in);
-
-    // блок для считывания файла
-    char* block = createBlock(file_size);
-
-    // копируем информацию из блока в файл
-    copyFileToBlock(in, block, file_size);
-
     // печатаем всю информацию из блока в выходной файл
-    write(out, block, file_size);
+    write(out, in->m_buffer, in->m_size);
 
-    // чистка памяти
-    delete[] block;
+    close(in->m_id);
+    close(out);
 
     return 0;
 }
