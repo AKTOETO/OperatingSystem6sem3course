@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include <memory>
+#include <list>
 
 // открытие файла, из которого читаем
 int openInputFile(const char* path)
@@ -203,6 +204,21 @@ void printDir(const char* path, int depth)
 
     // закрываем поток каталога
     closedir(dir);
+}
+
+// список файлов
+using fileList = std::list<pFile>;
+using pFileList = std::unique_ptr<fileList>;
+
+// получение списка файлов
+pFileList getFileList(const char* path)
+{
+    // список файлов
+    pFileList lst = std::make_unique<fileList>();
+
+    // TODO: проходимся по директории и читаем файлы
+
+    return lst;
 }
 
 int main(int argc, char** argv)
