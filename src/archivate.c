@@ -6,9 +6,6 @@
 #include <dirent.h>
 #include <string.h>
 
-#include <memory>
-#include <list>
-
 // открытие файла, из которого читаем
 int openInputFile(const char* path)
 {
@@ -62,7 +59,7 @@ int getFileSize(int file)
 char* createBlock(int size)
 {
     // блок для считывания файла
-    char* block = new char[size + 1];
+    char* block =  (char*)malloc((size + 1) * sizeof(char));
     block[size] = '\0';
     return block;
 }
@@ -95,28 +92,51 @@ struct file
 
     // размер буфера
     int m_size;
-
-    file(const char* _path):
-    m_id(-1), m_path(_path), m_buffer(nullptr), m_size(0)
-    {}
-
-    ~file()
-    {
-        //delete[] m_path;
-        delete[] m_buffer;
-    }
 };
 
-using pFile = std::unique_ptr<file>;
+// инициализация файла
+struct file* initFile()
+{
+    // выделение памяти под файл
+    struct file* f = (struct file*)malloc(sizeof(struct file));
+
+    // заполнение файла стандартными значениями
+    *f = (struct file){-1, NULL, NULL, 0};
+
+    return f;
+}
+
+struct file* initFileIdPath(int id, const char* path)
+{
+    // выделение памяти под файл
+    struct file* f = (struct file*)malloc(sizeof(struct file));
+
+    // заполнение файла стандартными значениями
+    *f = (struct file){id, path, NULL, 0};
+
+    return f;
+}
+
+void deleteFile(struct file* f)
+{
+    // if(!f->m_path)
+    //     free(f->m_path);
+    
+    if(!f->m_buffer)
+        free(f->m_buffer);
+
+    // закрытие файлового потока
+    close(f->m_id);
+}
+
+typedef struct file* pFile;
 
 // чтение файла
 pFile readInputFile(const char* path)
 {
-    // создаем файл
-    pFile f = std::make_unique<file>(path);
-
-    // открытие файла
-    f->m_id = openInputFile(path);
+    // создаем файл;
+    // сохранение пути и открытие файла
+    pFile f = initFileIdPath(openInputFile(path), path);
 
     // определение размера файла
     f->m_size = getFileSize(f->m_id);
@@ -147,9 +167,12 @@ void testReadInputFile(int argc, char** argv)
     // печатаем всю информацию из блока в выходной файл
     write(out, in->m_buffer, in->m_size);
 
-    close(in->m_id);
+    deleteFile(in);
+
+    //close(in->m_id);
     close(out);
 }
+
 
 // печать каталога
 void printDir(const char* path, int depth)
@@ -158,7 +181,7 @@ void printDir(const char* path, int depth)
     DIR* dir;
 
     // элемент каталога
-    dirent* entry;
+    struct dirent* entry;
 
     // для сборки информации
     struct stat statbuf;
@@ -206,21 +229,6 @@ void printDir(const char* path, int depth)
     closedir(dir);
 }
 
-// список файлов
-using fileList = std::list<pFile>;
-using pFileList = std::unique_ptr<fileList>;
-
-// получение списка файлов
-pFileList getFileList(const char* path)
-{
-    // список файлов
-    pFileList lst = std::make_unique<fileList>();
-
-    // TODO: проходимся по директории и читаем файлы
-
-    return lst;
-}
-
 int main(int argc, char** argv)
 {
     // получение пути к файлу, который надо считать, 
@@ -231,9 +239,8 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    // testReadInputFile(argc, argv);
-    
-    printDir(argv[1], 0);
+    testReadInputFile(argc, argv);
+    //printDir(argv[1], 0);
     
 
     return 0;
