@@ -1,11 +1,5 @@
 #include "file.h"
 
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <string.h>
-#include <fcntl.h>
 
 // функции обработки структуры File
 // создание файла
@@ -25,31 +19,20 @@ File* createFile()
 // печать информации о файле
 int printFile(File* f)
 {
-    if(f == NULL)
-        return FILE_DOESNT_EXIST;
+    // существование файла
+    FILE_EXISTANCE;
 
     // если есть путь
-    if(strcmp(f->m_path, "") == 0)
-    {
-        return FILE_HAS_NO_PATH;
-    }
+    FILE_PATH_EXISTANCE;
+
     // если есть дескриптор файла
-    if(f->m_id == -1)
-    {
-        return FILE_HAS_NO_DESCRIPTOR;
-    }
+    FILE_DESCRIPTOR_EXISTANCE;
 
     // если есть размер файла
-    if(f->m_size == -1)
-    {
-        return FILE_HAS_NO_SIZE;
-    }
+    FILE_SIZE_EXISTANCE;
 
     // если есть буфер файла
-    if(f->m_buffer == NULL)
-    {
-        return FILE_HAS_NO_BUFFER;
-    }
+    FILE_BUFER_EXISTANCE;
 
     printf("\nFILE INFO\n");
     printf("path  : <%s>\n", f->m_path);
@@ -75,10 +58,7 @@ void deleteFile(File* f)
 int setFilepath(File* f, const char* path)
 {
     // если файл не создан
-    if(f == NULL)
-    {
-        return FILE_DOESNT_EXIST;
-    }
+    FILE_EXISTANCE;
 
     // сохранение файлового пути
     f->m_path = path;
@@ -91,25 +71,16 @@ int setFilepath(File* f, const char* path)
 int openInputFile(File* f)
 {
     // если файл не создан
-    if(f == NULL)
-    {
-        return FILE_DOESNT_EXIST;
-    }
+    FILE_EXISTANCE;
 
     // если нет файлового пути
-    if(strcmp(f->m_path, "") == 0)
-    {
-        return FILE_HAS_NO_PATH;
-    }
+    FILE_PATH_EXISTANCE;
 
     // создание файлового дескриптора
     f->m_id = open(f->m_path, O_RDONLY);
 
     // если же дескриптор не был создан
-    if(f->m_id == -1)
-    {
-        return FILE_HAS_NO_DESCRIPTOR;
-    }
+    FILE_DESCRIPTOR_EXISTANCE;
 
     return OK;
 }
@@ -117,25 +88,16 @@ int openInputFile(File* f)
 int openOutputFile(File *f)
 {
     // если файл не создан
-    if(f == NULL)
-    {
-        return FILE_DOESNT_EXIST;
-    }
+    FILE_EXISTANCE;
 
     // если нет файлового пути
-    if(strcmp(f->m_path, "") == 0)
-    {
-        return FILE_HAS_NO_PATH;
-    }
+    FILE_PATH_EXISTANCE;
 
     // создание файлового дескриптора
     f->m_id = open(f->m_path, O_WRONLY|O_TRUNC|O_CREAT, S_IRUSR|S_IWUSR);
 
     // если же дескриптор не был создан
-    if(f->m_id == -1)
-    {
-        return FILE_HAS_NO_DESCRIPTOR;
-    }
+    FILE_DESCRIPTOR_EXISTANCE;
 
     return OK;
 }
@@ -144,10 +106,7 @@ int openOutputFile(File *f)
 int closeFile(File* f)
 {
     // если файл не создан
-    if(f == NULL)
-    {
-        return FILE_DOESNT_EXIST;
-    }
+    FILE_EXISTANCE;
 
     // разрыв связи файлового дескриптора с файлом
     close(f->m_id);
@@ -159,16 +118,10 @@ int closeFile(File* f)
 int readFileSize(File* f)
 {
     // если файл не создан
-    if(f == NULL)
-    {
-        return FILE_DOESNT_EXIST;
-    }
+    FILE_EXISTANCE;
 
     // если не создан файловый дескриптор
-    if(f->m_id == -1)
-    {
-        return FILE_HAS_NO_DESCRIPTOR;
-    }
+    FILE_DESCRIPTOR_EXISTANCE;
 
     // создание структуры для чтения информации о файле
     struct stat st;
@@ -186,25 +139,16 @@ int readFileSize(File* f)
 int readFileBuffer(File* f)
 {
     // если файл не создан
-    if(f == NULL)
-    {
-        return FILE_DOESNT_EXIST;
-    }
+    FILE_EXISTANCE;
 
     // если не задан размер файла
-    if(f->m_size == -1)
-    {
-        return FILE_HAS_NO_SIZE;
-    }
+    FILE_SIZE_EXISTANCE;
 
     // создание файлового буфера 
     f->m_buffer = (char*)malloc((f->m_size + 1) * sizeof(char));
 
     // если выделить память не удалось
-    if(f->m_buffer == NULL)
-    {
-        return FILE_HAS_NO_BUFFER;
-    }
+    FILE_BUFER_EXISTANCE;
 
     f->m_buffer[f->m_size] = '\0';
 
@@ -223,33 +167,11 @@ int readFileBuffer(File* f)
 
 int writeFile(File *f)
 {
-    // если файл не создан
-    if(f == NULL)
-    {
-        return FILE_DOESNT_EXIST;
-    }
-    // если есть путь
-    if(strcmp(f->m_path, "") == 0)
-    {
-        return FILE_HAS_NO_PATH;
-    }
-    // если есть дескриптор файла
-    if(f->m_id == -1)
-    {
-        return FILE_HAS_NO_DESCRIPTOR;
-    }
-
-    // если есть размер файла
-    if(f->m_size == -1)
-    {
-        return FILE_HAS_NO_SIZE;
-    }
-
-    // если есть буфер файла
-    if(f->m_buffer == NULL)
-    {
-        return FILE_HAS_NO_BUFFER;
-    }
+    FILE_EXISTANCE;
+    FILE_PATH_EXISTANCE; 
+    FILE_DESCRIPTOR_EXISTANCE;
+    FILE_SIZE_EXISTANCE;       
+    FILE_BUFER_EXISTANCE;        
 
     // записываем сколько байт записалось
     int write_bytes = write(f->m_id, f->m_buffer, f->m_size);
@@ -261,7 +183,6 @@ int writeFile(File *f)
     {
         return FILE_INCORRECT_OUTPUT_SIZE;
     }
-
 
     return OK;
 }

@@ -13,7 +13,7 @@ FileDir* createFileDir()
 }
 
 // удаление директории с файлами
-void deleteFileDir(FileDir *f)
+int deleteFileDir(FileDir *f)
 {
     // если файловая директория существует 
     if(f == NULL)
@@ -36,4 +36,6 @@ void deleteFileDir(FileDir *f)
 
     // удаляем саму директорию
     free(f);
+
+    return OK;
 }

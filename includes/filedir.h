@@ -18,7 +18,7 @@ typedef struct
 FileDir* createFileDir();
 
 // удаление директории с файлами
-void deleteFileDir(FileDir* f);
+int deleteFileDir(FileDir* f);
 
 
 #endif // !FILEDIR_H
