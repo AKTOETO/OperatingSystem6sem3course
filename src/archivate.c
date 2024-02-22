@@ -1,233 +1,252 @@
 #include <unistd.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <dirent.h>
 #include <string.h>
 
-// открытие файла, из которого читаем
-int openInputFile(const char* path)
-{
-    // открытие файла
-    int in = open(path, O_RDONLY);
+#include "file.h"
 
-    // если файл не был открыт
-    if(in == -1)
-    {
-        printf("Файл %s не был открыт\n", path);
-        exit(-1);
-    }
+// // открытие файла, из которого читаем
+// int openInputFile(const char* path)
+// {
+//     // открытие файла
+//     int in = open(path, O_RDONLY);
 
-    printf("Файл %s открыт\n", path);
+//     // если файл не был открыт
+//     if(in == -1)
+//     {
+//         printf("Файл %s не был открыт\n", path);
+//         exit(-1);
+//     }
 
-    return in;
-}
+//     printf("Файл %s открыт\n", path);
 
-// открытие файла, в который пишем
-int openOutputFile(const char* path)
-{
-    // открытие файла
-    int out = open(path, O_WRONLY|O_TRUNC|O_CREAT, S_IRUSR|S_IWUSR);
+//     return in;
+// }
 
-    // если файл не был открыт
-    if(out == -1)
-    {
-        printf("Файл %s не был открыт\n", path);
-        exit(-1);
-    }
+// // открытие файла, в который пишем
+// int openOutputFile(const char* path)
+// {
+//     // открытие файла
+//     int out = open(path, O_WRONLY|O_TRUNC|O_CREAT, S_IRUSR|S_IWUSR);
+
+//     // если файл не был открыт
+//     if(out == -1)
+//     {
+//         printf("Файл %s не был открыт\n", path);
+//         exit(-1);
+//     }
         
-    printf("Файл %s открыт\n", path);
+//     printf("Файл %s открыт\n", path);
 
-    return out;
-}
+//     return out;
+// }
 
-// определение ращмера файла
-int getFileSize(int file)
-{
-    // определение размера файла
-    int file_size = lseek(file, 0, SEEK_END);
-    printf("Размер файла %d\n", file_size);
+// // определение ращмера файла
+// int getFileSize(int file)
+// {
+//     // определение размера файла
+//     int file_size = lseek(file, 0, SEEK_END);
+//     printf("Размер файла %d\n", file_size);
     
-    // ставим курсор в начало файла
-    lseek(file, 0, SEEK_SET);
+//     // ставим курсор в начало файла
+//     lseek(file, 0, SEEK_SET);
 
-    return file_size;
-}
+//     return file_size;
+// }
 
-// создание блока для считывания файла
-char* createBlock(int size)
-{
-    // блок для считывания файла
-    char* block =  (char*)malloc((size + 1) * sizeof(char));
-    block[size] = '\0';
-    return block;
-}
+// // создание блока для считывания файла
+// char* createBlock(int size)
+// {
+//     // блок для считывания файла
+//     char* block =  (char*)malloc((size + 1) * sizeof(char));
+//     block[size] = '\0';
+//     return block;
+// }
 
-// копирование файла в выделенный блок
-int copyFileToBlock(int file, char* block, int size)
-{
-    // количество считанных байт
-    int read_size = 0;
+// // копирование файла в выделенный блок
+// int copyFileToBlock(int file, char* block, int size)
+// {
+//     // количество считанных байт
+//     int read_size = 0;
 
-    // поблочное копирование файла
-    read_size = read(file, block, size);
+//     // поблочное копирование файла
+//     read_size = read(file, block, size);
     
-    printf("Считанный блок данных в %d байт:\n %s \n", read_size, block);
+//     printf("Считанный блок данных в %d байт:\n %s \n", read_size, block);
 
-    return read_size;
-}
+//     return read_size;
+// }
 
-// структура файла
-struct file
-{
-    // идентификатор файла
-    int m_id;
+// // структура файла
+// struct file
+// {
+//     // идентификатор файла
+//     int m_id;
 
-    // путь к файлу
-    const char* m_path;
+//     // путь к файлу
+//     const char* m_path;
 
-    // информация в нем
-    char* m_buffer;
+//     // информация в нем
+//     char* m_buffer;
 
-    // размер буфера
-    int m_size;
-};
+//     // размер буфера
+//     int m_size;
+// };
 
-// инициализация файла
-struct file* initFile()
-{
-    // выделение памяти под файл
-    struct file* f = (struct file*)malloc(sizeof(struct file));
+// // инициализация файла
+// struct file* initFile()
+// {
+//     // выделение памяти под файл
+//     struct file* f = (struct file*)malloc(sizeof(struct file));
 
-    // заполнение файла стандартными значениями
-    *f = (struct file){-1, NULL, NULL, 0};
+//     // заполнение файла стандартными значениями
+//     *f = (struct file){-1, NULL, NULL, 0};
 
-    return f;
-}
+//     return f;
+// }
 
-struct file* initFileIdPath(int id, const char* path)
-{
-    // выделение памяти под файл
-    struct file* f = (struct file*)malloc(sizeof(struct file));
+// struct file* initFileIdPath(int id, const char* path)
+// {
+//     // выделение памяти под файл
+//     struct file* f = (struct file*)malloc(sizeof(struct file));
 
-    // заполнение файла стандартными значениями
-    *f = (struct file){id, path, NULL, 0};
+//     // заполнение файла стандартными значениями
+//     *f = (struct file){id, path, NULL, 0};
 
-    return f;
-}
+//     return f;
+// }
 
-void deleteFile(struct file* f)
-{
-    // if(!f->m_path)
-    //     free(f->m_path);
+// void deleteFile(struct file* f)
+// {
+//     // if(!f->m_path)
+//     //     free(f->m_path);
     
-    if(!f->m_buffer)
-        free(f->m_buffer);
+//     if(f->m_buffer)
+//         free(f->m_buffer);
 
-    // закрытие файлового потока
-    close(f->m_id);
-}
+//     // закрытие файлового потока
+//     close(f->m_id);
 
-typedef struct file* pFile;
+//     free(f);
+// }
 
-// чтение файла
-pFile readInputFile(const char* path)
-{
-    // создаем файл;
-    // сохранение пути и открытие файла
-    pFile f = initFileIdPath(openInputFile(path), path);
+// typedef struct file* pFile;
 
-    // определение размера файла
-    f->m_size = getFileSize(f->m_id);
+// // чтение файла
+// pFile readInputFile(const char* path)
+// {
+//     // создаем файл;
+//     // сохранение пути и открытие файла
+//     pFile f = initFileIdPath(openInputFile(path), path);
 
-    // блок для считывания файла
-    f->m_buffer = createBlock(f->m_size);
+//     // определение размера файла
+//     f->m_size = getFileSize(f->m_id);
 
-    // копируем информацию из блока в файл
-    copyFileToBlock(f->m_id, f->m_buffer, f->m_size);
+//     // блок для считывания файла
+//     f->m_buffer = createBlock(f->m_size);
 
-    return f;
-}
+//     // копируем информацию из блока в файл
+//     copyFileToBlock(f->m_id, f->m_buffer, f->m_size);
+//     printf("PATH: : : :: %s\n", f->m_path);
 
-// функция тестирования работоспособности readInputFile
-void testReadInputFile(int argc, char** argv)
-{
-    // путь к файлу, который будем читать
-    const char* file_path = argv[1];
-    // входной и выходной файл
-    int out;
+//     return f;
+// }
 
-    // создание входного файла
-    pFile in = readInputFile(file_path);
+// // функция тестирования работоспособности readInputFile
+// void testReadInputFile(int argc, char** argv)
+// {
+//     // путь к файлу, который будем читать
+//     const char* file_path = argv[1];
+//     // входной и выходной файл
+//     int out;
 
-    // открытие файла
-    out = openOutputFile("file.out");
+//     // создание входного файла
+//     pFile in = readInputFile(file_path);
 
-    // печатаем всю информацию из блока в выходной файл
-    write(out, in->m_buffer, in->m_size);
+//     // открытие файла
+//     out = openOutputFile("file.out");
 
-    deleteFile(in);
+//     // печатаем всю информацию из блока в выходной файл
+//     write(out, in->m_buffer, in->m_size);
 
-    //close(in->m_id);
-    close(out);
-}
+//     deleteFile(in);
 
+//     //close(in->m_id);
+//     close(out);
+// }
 
-// печать каталога
-void printDir(const char* path, int depth)
-{
-    //поток каталога
-    DIR* dir;
+// static pFile files[20];
+// static int ptr = 0;
 
-    // элемент каталога
-    struct dirent* entry;
+// // печать каталога
+// void listDir(const char* path, int depth)
+// {
+//     //printf("\t\tpath: %s\n", path);
 
-    // для сборки информации
-    struct stat statbuf;
+//     // поток каталога
+//     DIR* dir;
 
-    // пытаемся открыть каталог
-    if((dir = opendir(path)) == NULL)
-    {
-        fprintf(stderr, "Директория %s не была открыта", path);
-        return;
-    }
+//     // элемент каталога
+//     struct dirent* entry;
 
-    // переходим в открытую директорию
-    chdir(path);
+//     // для сборки информации
+//     struct stat statbuf;
 
-    // проходимся по всем элементам этой директории
-    while((entry = readdir(dir)) != NULL)
-    {
-        // получение справочной информации о текущем элементе каталога
-        lstat(entry->d_name, &statbuf);
+//     // пытаемся открыть каталог
+//     if((dir = opendir(path)) == NULL)
+//     {
+//         fprintf(stderr, " Директория %s не была открыта\n", path);
+//         return;
+//     }
 
-        // если текущий элемент - каталог
-        if(S_ISDIR(statbuf.st_mode))
-        {
-            // игнорируем каталоги "." и ".."
-            if(strcmp(".",entry->d_name) == 0 ||
-               strcmp("..", entry->d_name) == 0)
-                continue;
+//     // переходим в открытую директорию
+//     chdir(path);
+
+//     // проходимся по всем элементам этой директории
+//     while((entry = readdir(dir)) != NULL)
+//     {
+//         // получение справочной информации о текущем элементе каталога
+//         lstat(entry->d_name, &statbuf);
+        
+//         // полный путь
+//         char full_path[1024];
+//         snprintf(full_path, sizeof(full_path), "%s/%s", path, entry->d_name);
+        
+//         // если текущий элемент - каталог
+//         if(S_ISDIR(statbuf.st_mode))
+//         {
+//             // игнорируем каталоги "." и ".."
+//             if(strcmp(".",entry->d_name) == 0 ||
+//                strcmp("..", entry->d_name) == 0)
+//                 continue;
             
-            printf("%*s%s/\n", depth, " ", entry->d_name);
+//             //printf("%*s%s/\n", depth, " ", entry->d_name);
 
-            // вызываем рекурсивную печать от текущего каталога
-            printDir(entry->d_name, depth+4);
-        }
-        // если же это файл
-        else
-        {
-            printf("%*s%s\n", depth, " ", entry->d_name);
-        }
-    }
+//             // вызываем рекурсивную печать от текущего каталога
+//             listDir(full_path, depth+4);
+//         }
+//         // если же это файл
+//         else
+//         {
+//             printf("\t fullpath for \"%s\" is \"%s\"\n", entry->d_name, full_path);
+//             //printf("%*s%s\n", depth, " ", entry->d_name);
 
-    // переходим в директорию выше
-    chdir("..");
+//             // добавляем файл 
+//             files[ptr++] = readInputFile(full_path);
+//             printf("PATH ==== %s\n", files[ptr-1]->m_path);
+//         }
+//     }
 
-    // закрываем поток каталога
-    closedir(dir);
-}
+//     // переходим в директорию выше
+//     chdir("..");
+
+//     // закрываем поток каталога
+//     closedir(dir);
+// }
 
 int main(int argc, char** argv)
 {
@@ -239,9 +258,25 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    testReadInputFile(argc, argv);
-    //printDir(argv[1], 0);
+    file* f = createFile();
+    errorPrint(setFilepath(f, argv[1]));
+    errorPrint(openInputFile(f));
+    errorPrint(readFileSize(f));
+    errorPrint(readFileBuffer(f));
     
+    errorPrint(printFile(f));
+
+    errorPrint(closeFile(f));
+
+    //testReadInputFile(argc, argv);
+    //listDir(argv[1], 0);
+    
+
+    //for(int i = 0; i < ptr;i++)
+    //{
+    //    printf("путь: \"%s\", размер \"%d\"\n", files[i]->m_path, files[i]->m_size);
+    //    deleteFile(files[i]);
+    //}
 
     return 0;
 }

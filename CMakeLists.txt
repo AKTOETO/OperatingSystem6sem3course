@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 3.22)
 project(archivator)
 
-set(CXX_STANDART 20)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fsanitize=address")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fsanitize=address")
 
-# all .cpp
+# all .c
 file(GLOB_RECURSE SRC ${PROJECT_SOURCE_DIR}/src/*.c)
 
-add_executable(${CMAKE_PROJECT_NAME} ${SRC})
+# all .h
+file(GLOB_RECURSE HDRS ${PROJECT_SOURCE_DIR}/includes/*.h)
+
+add_executable(${CMAKE_PROJECT_NAME} ${SRC} ${HDRS})
+
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/includes)
