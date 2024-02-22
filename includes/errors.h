@@ -12,6 +12,7 @@
 #define FILE_HAS_NO_SIZE            (1 << 4)
 #define FILE_HAS_NO_BUFFER          (1 << 5)
 #define FILE_INCORRECT_INPUT_SIZE   (1 << 6)
+#define FILE_INCORRECT_OUTPUT_SIZE  (1 << 7)
 
 // расшифорвка сообщений об ошибках
 #define STR(str) #str

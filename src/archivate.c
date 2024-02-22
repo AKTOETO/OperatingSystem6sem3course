@@ -252,13 +252,15 @@ int main(int argc, char** argv)
 {
     // получение пути к файлу, который надо считать, 
     // через аргументы argv
-    if(argc < 2)
+    if(argc < 3)
     {
         printf("Недостаточно аргументов (нужен еще путь к файлу)\n");
         return 1;
     }
 
+    // создание файла
     file* f = createFile();
+
     errorPrint(setFilepath(f, argv[1]));
     errorPrint(openInputFile(f));
     errorPrint(readFileSize(f));
@@ -266,7 +268,15 @@ int main(int argc, char** argv)
     
     errorPrint(printFile(f));
 
+    // создаю дескриптор выходного файла
+    errorPrint(setFilepath(f, argv[2]));
+    errorPrint(openOutputFile(f));
+    errorPrint(writeFile(f));
+    
+    errorPrint(printFile(f));
+
     errorPrint(closeFile(f));
+    deleteFile(f);
 
     //testReadInputFile(argc, argv);
     //listDir(argv[1], 0);

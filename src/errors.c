@@ -8,12 +8,6 @@ void errorPrint(int er)
         const char* er_msg = "\0";
 
         // проверка на каждый код ошибки
-        // IF_ERR(er, FILE_DOESNT_EXIST)
-        //     er_msg = "FILE_DOESNT_EXIST";
-        
-        // IF_ERR(er, FILE_HAS_NO_DESCRIPTOR)
-        //     er_msg = "FILE_HAS_NO_DESCRIPTOR";
-        
         CR_ERR_MSG(er_msg, er, FILE_DOESNT_EXIST);
         CR_ERR_MSG(er_msg, er, FILE_HAS_NO_DESCRIPTOR);
         CR_ERR_MSG(er_msg, er, FILE_HAS_NO_PATH);
@@ -21,6 +15,10 @@ void errorPrint(int er)
         CR_ERR_MSG(er_msg, er, FILE_INCORRECT_INPUT_SIZE);
         //CR_ERR_MSG(er_msg, er, FILE_DOESNT_EXIST);
         
-        fprintf(stderr, "error msg: <%s>\n", er_msg);
+        // печать системных ошибок
+        perror("system error");
+
+        // печать ошибки приложения
+        fprintf(stderr, "error msg: <%s>\n\n", er_msg);
     }
 }

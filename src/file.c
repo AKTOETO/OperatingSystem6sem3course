@@ -22,6 +22,44 @@ file* createFile()
     return f;
 }
 
+// печать информации о файле
+int printFile(file* f)
+{
+    if(f == NULL)
+        return FILE_DOESNT_EXIST;
+
+    // если есть путь
+    if(strcmp(f->m_path, "") == 0)
+    {
+        return FILE_HAS_NO_PATH;
+    }
+    // если есть дескриптор файла
+    if(f->m_id == -1)
+    {
+        return FILE_HAS_NO_DESCRIPTOR;
+    }
+
+    // если есть размер файла
+    if(f->m_size == -1)
+    {
+        return FILE_HAS_NO_SIZE;
+    }
+
+    // если есть буфер файла
+    if(f->m_buffer == NULL)
+    {
+        return FILE_HAS_NO_BUFFER;
+    }
+
+    printf("\nFILE INFO\n");
+    printf("path  : <%s>\n", f->m_path);
+    printf("id    : <%d>\n", f->m_id);
+    printf("size  : <%d>\n", f->m_size);
+    printf("buffer: <%s>\n", f->m_buffer);
+
+    return OK;
+}
+
 // удаление файла
 void deleteFile(file* f)
 {
@@ -76,6 +114,32 @@ int openInputFile(file* f)
     return OK;
 }
 
+int openOutputFile(file *f)
+{
+    // если файл не создан
+    if(f == NULL)
+    {
+        return FILE_DOESNT_EXIST;
+    }
+
+    // если нет файлового пути
+    if(strcmp(f->m_path, "") == 0)
+    {
+        return FILE_HAS_NO_PATH;
+    }
+
+    // создание файлового дескриптора
+    f->m_id = open(f->m_path, O_WRONLY|O_TRUNC|O_CREAT, S_IRUSR|S_IWUSR);
+
+    // если же дескриптор не был создан
+    if(f->m_id == -1)
+    {
+        return FILE_HAS_NO_DESCRIPTOR;
+    }
+
+    return OK;
+}
+
 // закрытие файла
 int closeFile(file* f)
 {
@@ -87,9 +151,6 @@ int closeFile(file* f)
 
     // разрыв связи файлового дескриптора с файлом
     close(f->m_id);
-
-    // удаление файла
-    deleteFile(f);
 
     return OK;
 }
@@ -160,12 +221,13 @@ int readFileBuffer(file* f)
     return OK;
 }
 
-// печать информации о файле
-int printFile(file* f)
+int writeFile(file *f)
 {
+    // если файл не создан
     if(f == NULL)
+    {
         return FILE_DOESNT_EXIST;
-
+    }
     // если есть путь
     if(strcmp(f->m_path, "") == 0)
     {
@@ -189,10 +251,17 @@ int printFile(file* f)
         return FILE_HAS_NO_BUFFER;
     }
 
-    printf("\nfile path  : <%s>\n", f->m_path);
-    printf("file id    : <%d>\n", f->m_id);
-    printf("file size  : <%d>\n", f->m_size);
-    printf("file buffer: <%s>\n", f->m_buffer);
+    // записываем сколько байт записалось
+    int write_bytes = write(f->m_id, f->m_buffer, f->m_size);
+
+    // если количество байт = -1 или 
+    // размер файла не равен количеству распечатанных байт,
+    // значит произошла ошибка
+    if(write_bytes == -1 || write_bytes != f->m_size)
+    {
+        return FILE_INCORRECT_OUTPUT_SIZE;
+    }
+
 
     return OK;
 }

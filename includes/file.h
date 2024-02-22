@@ -16,6 +16,9 @@ typedef struct
 
 } file;
 
+// печать информации о файле
+int printFile(file* f);
+
 // функции обработки структуры file
 // создание файла
 file* createFile();
@@ -30,6 +33,9 @@ int setFilepath(file* f, const char* path);
 // для файла чтения
 int openInputFile(file* f);
 
+// создание файлового дескриптора для печати файла
+int openOutputFile(file* f);
+
 // закрытие файла
 int closeFile(file* f);
 
@@ -39,7 +45,7 @@ int readFileSize(file* f);
 // чтение буфера файла
 int readFileBuffer(file* f);
 
-// печать информации о файле
-int printFile(file* f);
+// вывести содержимое буфера в файл
+int writeFile(file* f);
 
 #endif // !FILE_H
