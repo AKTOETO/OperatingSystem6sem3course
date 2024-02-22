@@ -14,38 +14,38 @@ typedef struct
     
     int m_size; // размер буфера
 
-} file;
+} File;
 
 // печать информации о файле
-int printFile(file* f);
+int printFile(File* f);
 
-// функции обработки структуры file
+// функции обработки структуры File
 // создание файла
-file* createFile();
+File* createFile();
 
 // удаление файла
-void deleteFile(file* f);
+void deleteFile(File* f);
 
 // установить файловый путь 
-int setFilepath(file* f, const char* path);
+int setFilepath(File* f, const char* path);
 
 // создание файлового дескриптора
 // для файла чтения
-int openInputFile(file* f);
+int openInputFile(File* f);
 
 // создание файлового дескриптора для печати файла
-int openOutputFile(file* f);
+int openOutputFile(File* f);
 
 // закрытие файла
-int closeFile(file* f);
+int closeFile(File* f);
 
 // чтение размера файла
-int readFileSize(file* f);
+int readFileSize(File* f);
 
 // чтение буфера файла
-int readFileBuffer(file* f);
+int readFileBuffer(File* f);
 
 // вывести содержимое буфера в файл
-int writeFile(file* f);
+int writeFile(File* f);
 
 #endif // !FILE_H

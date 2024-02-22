@@ -7,11 +7,11 @@
 #include <string.h>
 #include <fcntl.h>
 
-// функции обработки структуры file
+// функции обработки структуры File
 // создание файла
-file* createFile()
+File* createFile()
 {
-    file* f = (file*)calloc(1, sizeof(file));
+    File* f = (File*)calloc(1, sizeof(File));
 
     // значения по умолчанию
     f->m_id = -1;
@@ -23,7 +23,7 @@ file* createFile()
 }
 
 // печать информации о файле
-int printFile(file* f)
+int printFile(File* f)
 {
     if(f == NULL)
         return FILE_DOESNT_EXIST;
@@ -61,7 +61,7 @@ int printFile(file* f)
 }
 
 // удаление файла
-void deleteFile(file* f)
+void deleteFile(File* f)
 {
     // удаление буфера
     if(f->m_buffer != NULL)
@@ -72,7 +72,7 @@ void deleteFile(file* f)
 }
 
 // установить файловый путь 
-int setFilepath(file* f, const char* path)
+int setFilepath(File* f, const char* path)
 {
     // если файл не создан
     if(f == NULL)
@@ -88,7 +88,7 @@ int setFilepath(file* f, const char* path)
 
 // создание файлового дескриптора
 // для файла чтения
-int openInputFile(file* f)
+int openInputFile(File* f)
 {
     // если файл не создан
     if(f == NULL)
@@ -114,7 +114,7 @@ int openInputFile(file* f)
     return OK;
 }
 
-int openOutputFile(file *f)
+int openOutputFile(File *f)
 {
     // если файл не создан
     if(f == NULL)
@@ -141,7 +141,7 @@ int openOutputFile(file *f)
 }
 
 // закрытие файла
-int closeFile(file* f)
+int closeFile(File* f)
 {
     // если файл не создан
     if(f == NULL)
@@ -156,7 +156,7 @@ int closeFile(file* f)
 }
 
 // чтение размера файла
-int readFileSize(file* f)
+int readFileSize(File* f)
 {
     // если файл не создан
     if(f == NULL)
@@ -183,7 +183,7 @@ int readFileSize(file* f)
 }
 
 // чтение буфера файла
-int readFileBuffer(file* f)
+int readFileBuffer(File* f)
 {
     // если файл не создан
     if(f == NULL)
@@ -221,7 +221,7 @@ int readFileBuffer(file* f)
     return OK;
 }
 
-int writeFile(file *f)
+int writeFile(File *f)
 {
     // если файл не создан
     if(f == NULL)

@@ -46,14 +46,14 @@
 // }
 
 // // определение ращмера файла
-// int getFileSize(int file)
+// int getFileSize(int File)
 // {
 //     // определение размера файла
-//     int file_size = lseek(file, 0, SEEK_END);
+//     int file_size = lseek(File, 0, SEEK_END);
 //     printf("Размер файла %d\n", file_size);
     
 //     // ставим курсор в начало файла
-//     lseek(file, 0, SEEK_SET);
+//     lseek(File, 0, SEEK_SET);
 
 //     return file_size;
 // }
@@ -68,13 +68,13 @@
 // }
 
 // // копирование файла в выделенный блок
-// int copyFileToBlock(int file, char* block, int size)
+// int copyFileToBlock(int File, char* block, int size)
 // {
 //     // количество считанных байт
 //     int read_size = 0;
 
 //     // поблочное копирование файла
-//     read_size = read(file, block, size);
+//     read_size = read(File, block, size);
     
 //     printf("Считанный блок данных в %d байт:\n %s \n", read_size, block);
 
@@ -82,7 +82,7 @@
 // }
 
 // // структура файла
-// struct file
+// struct File
 // {
 //     // идентификатор файла
 //     int m_id;
@@ -98,29 +98,29 @@
 // };
 
 // // инициализация файла
-// struct file* initFile()
+// struct File* initFile()
 // {
 //     // выделение памяти под файл
-//     struct file* f = (struct file*)malloc(sizeof(struct file));
+//     struct File* f = (struct File*)malloc(sizeof(struct File));
 
 //     // заполнение файла стандартными значениями
-//     *f = (struct file){-1, NULL, NULL, 0};
+//     *f = (struct File){-1, NULL, NULL, 0};
 
 //     return f;
 // }
 
-// struct file* initFileIdPath(int id, const char* path)
+// struct File* initFileIdPath(int id, const char* path)
 // {
 //     // выделение памяти под файл
-//     struct file* f = (struct file*)malloc(sizeof(struct file));
+//     struct File* f = (struct File*)malloc(sizeof(struct File));
 
 //     // заполнение файла стандартными значениями
-//     *f = (struct file){id, path, NULL, 0};
+//     *f = (struct File){id, path, NULL, 0};
 
 //     return f;
 // }
 
-// void deleteFile(struct file* f)
+// void deleteFile(struct File* f)
 // {
 //     // if(!f->m_path)
 //     //     free(f->m_path);
@@ -134,7 +134,7 @@
 //     free(f);
 // }
 
-// typedef struct file* pFile;
+// typedef struct File* pFile;
 
 // // чтение файла
 // pFile readInputFile(const char* path)
@@ -168,7 +168,7 @@
 //     pFile in = readInputFile(file_path);
 
 //     // открытие файла
-//     out = openOutputFile("file.out");
+//     out = openOutputFile("File.out");
 
 //     // печатаем всю информацию из блока в выходной файл
 //     write(out, in->m_buffer, in->m_size);
@@ -248,18 +248,10 @@
 //     closedir(dir);
 // }
 
-int main(int argc, char** argv)
+void testFileFunc(int argc, char** argv)
 {
-    // получение пути к файлу, который надо считать, 
-    // через аргументы argv
-    if(argc < 3)
-    {
-        printf("Недостаточно аргументов (нужен еще путь к файлу)\n");
-        return 1;
-    }
-
     // создание файла
-    file* f = createFile();
+    File* f = createFile();
 
     errorPrint(setFilepath(f, argv[1]));
     errorPrint(openInputFile(f));
@@ -277,6 +269,20 @@ int main(int argc, char** argv)
 
     errorPrint(closeFile(f));
     deleteFile(f);
+}
+
+int main(int argc, char** argv)
+{
+    // получение пути к файлу, который надо считать, 
+    // через аргументы argv
+    if(argc < 3)
+    {
+        printf("Недостаточно аргументов (нужен еще путь к файлу)\n");
+        return 1;
+    }
+
+    // тестирование файловых функций
+    testFileFunc(argc, argv);
 
     //testReadInputFile(argc, argv);
     //listDir(argv[1], 0);

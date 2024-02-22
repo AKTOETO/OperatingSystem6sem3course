@@ -13,7 +13,8 @@ void errorPrint(int er)
         CR_ERR_MSG(er_msg, er, FILE_HAS_NO_PATH);
         CR_ERR_MSG(er_msg, er, FILE_HAS_NO_SIZE);
         CR_ERR_MSG(er_msg, er, FILE_INCORRECT_INPUT_SIZE);
-        //CR_ERR_MSG(er_msg, er, FILE_DOESNT_EXIST);
+        CR_ERR_MSG(er_msg, er, FILE_INCORRECT_OUTPUT_SIZE);
+        CR_ERR_MSG(er_msg, er, FDIR_DOESNT_EXIST);
         
         // печать системных ошибок
         perror("system error");
