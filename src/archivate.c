@@ -7,7 +7,7 @@
 #include <dirent.h>
 #include <string.h>
 
-#include "file.h"
+#include "filedir.h"
 
 // // открытие файла, из которого читаем
 // int openInputFile(const char* path)
@@ -250,6 +250,12 @@
 
 void testFileFunc(int argc, char** argv)
 {
+    if(argc < 3)
+    {
+        printf("Недостаточно аргументов (нужен еще путь к файлу)\n");
+        return;
+    }
+
     // создание файла
     File* f = createFile();
 
@@ -271,18 +277,36 @@ void testFileFunc(int argc, char** argv)
     deleteFile(f);
 }
 
-int main(int argc, char** argv)
+void testFileDirRead(int argc, char** argv)
 {
     // получение пути к файлу, который надо считать, 
     // через аргументы argv
-    if(argc < 3)
+    if(argc < 2)
     {
         printf("Недостаточно аргументов (нужен еще путь к файлу)\n");
-        return 1;
+        return;
     }
 
+    // тестирование считывания файлов из директории
+    FileDir* fd = createFileDir();
+    errorPrint(setPath(fd, argv[1]));
+    errorPrint(countFilesInDirectory(fd));
+    errorPrint(allocateFileArray(fd));
+    errorPrint(readFilesInDir(fd));
+
+    errorPrint(printFileDir(fd));
+
+    errorPrint(deleteFileDir(fd));
+}
+
+int main(int argc, char** argv)
+{
     // тестирование файловых функций
-    testFileFunc(argc, argv);
+    //testFileFunc(argc, argv);
+
+    // тестирование считывания файлов из директории
+    testFileDirRead(argc, argv);
+
 
     //testReadInputFile(argc, argv);
     //listDir(argv[1], 0);

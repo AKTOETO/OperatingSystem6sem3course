@@ -8,7 +8,7 @@ typedef struct
 {
     int m_id; // дескриптор файла
     
-    const char* m_path; // путь к файлу
+    char* m_path; // путь к файлу
     
     char* m_buffer; // информация в нем
     
@@ -18,7 +18,7 @@ typedef struct
 
 // проверки для выполнения
 #define FILE_EXISTANCE              if(f == NULL) return FILE_DOESNT_EXIST
-#define FILE_PATH_EXISTANCE         if(strcmp(f->m_path, "") == 0)return FILE_HAS_NO_PATH
+#define FILE_PATH_EXISTANCE         if(f->m_path == NULL)return FILE_HAS_NO_PATH
 #define FILE_DESCRIPTOR_EXISTANCE   if(f->m_id == -1)return FILE_HAS_NO_DESCRIPTOR
 #define FILE_SIZE_EXISTANCE         if(f->m_size == -1)return FILE_HAS_NO_SIZE
 #define FILE_BUFER_EXISTANCE        if(f->m_buffer == NULL)return FILE_HAS_NO_BUFFER

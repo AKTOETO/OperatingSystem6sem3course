@@ -11,7 +11,7 @@ File* createFile()
     f->m_id = -1;
     f->m_buffer = NULL;
     f->m_size = -1;
-    f->m_path = "";
+    f->m_path = NULL;
 
     return f;
 }
@@ -50,6 +50,10 @@ void deleteFile(File* f)
     if(f->m_buffer != NULL)
         free(f->m_buffer);
 
+    // удаление пути
+    if(f->m_path != NULL)
+        free(f->m_path);
+
     // удаление структуры файла
     free(f);
 }
@@ -61,7 +65,10 @@ int setFilepath(File* f, const char* path)
     FILE_EXISTANCE;
 
     // сохранение файлового пути
-    f->m_path = path;
+    f->m_path = realloc(f->m_path, strlen(path) + 1);
+
+    // копирование переданного пути в f->m_path
+    strcpy(f->m_path, path);
 
     return OK;
 }
