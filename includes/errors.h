@@ -29,6 +29,8 @@
 #define FDIR_FILES_DOESNT_EXIST     (1 << 13)
 #define FDIR_COULDNT_CREATE_FILES   (1 << 14)
 #define FDIR_FILE_COUNT_IS_0        (1 << 15)
+// ФАЙЛОВЫЙ МАССИВ
+#define FARR_DOESNT_EXIST           (1 << 16)
 
 // расшифровка сообщений об ошибках
 #define STR(str) #str

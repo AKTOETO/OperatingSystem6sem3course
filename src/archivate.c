@@ -1,13 +1,18 @@
+#define _XOPEN_SOURCE 500 // для подключения новых функций стандарта POSIX
+                          // nftw
+
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <dirent.h>
 #include <string.h>
+#include <ftw.h>
 
-#include "filedir.h"
+#include "file.h"
 
 // // открытие файла, из которого читаем
 // int openInputFile(const char* path)
@@ -277,26 +282,154 @@ void testFileFunc(int argc, char** argv)
     deleteFile(f);
 }
 
-void testFileDirRead(int argc, char** argv)
+// void testFileDirRead(int argc, char** argv)
+// {
+//     // получение пути к файлу, который надо считать, 
+//     // через аргументы argv
+//     if(argc < 2)
+//     {
+//         printf("Недостаточно аргументов (нужен еще путь к файлу)\n");
+//         return;
+//     }
+
+//     // тестирование считывания файлов из директории
+//     FileDir* fd = createFileDir();
+//     errorPrint(setPath(fd, argv[1]));
+//     errorPrint(countFilesInDirectory(fd));
+//     errorPrint(allocateFileArray(fd));
+//     errorPrint(readFilesInDir(fd));
+
+//     errorPrint(printFileDir(fd));
+
+//     errorPrint(deleteFileDir(fd));
+// }
+
+int display_info(const char *fpath, const struct stat *sb,
+             int tflag, struct FTW *ftwbuf)
 {
-    // получение пути к файлу, который надо считать, 
-    // через аргументы argv
-    if(argc < 2)
+    printf("%-3s %2d %7jd   %-90s %d %s\n",
+        (tflag == FTW_D) ?   "d"   : (tflag == FTW_DNR) ? "dnr" :
+        (tflag == FTW_DP) ?  "dp"  : (tflag == FTW_F) ?   "f" :
+        (tflag == FTW_NS) ?  "ns"  : (tflag == FTW_SL) ?  "sl" :
+        (tflag == FTW_SLN) ? "sln" : "???",
+        ftwbuf->level, (intmax_t) sb->st_size,
+        fpath, ftwbuf->base, fpath + ftwbuf->base);
+
+    return 0;           /* To tell nftw() to continue */
+}
+
+// список файлов
+File** files;
+// количество файлов
+int f_size = 0;
+// текущий файл
+int f_ind = 0;
+
+// создание списка файлов
+File** createFileArr(int size)
+{
+    return (File**)calloc(size, sizeof(File*));
+}
+
+// удаление списка файлов
+int deleteFileArr(File** fa)
+{
+    // если списка файлов не существует 
+    if(fa == NULL)
     {
-        printf("Недостаточно аргументов (нужен еще путь к файлу)\n");
-        return;
+        return FARR_DOESNT_EXIST;
     }
 
-    // тестирование считывания файлов из директории
-    FileDir* fd = createFileDir();
-    errorPrint(setPath(fd, argv[1]));
-    errorPrint(countFilesInDirectory(fd));
-    errorPrint(allocateFileArray(fd));
-    errorPrint(readFilesInDir(fd));
+    // проходимся по всему списку файлов
+    for(int i = 0; i < f_size; i++)
+    {
+        // если существует файл, удаляем его
+        if(fa[i] != NULL)
+        {
+            closeFile(fa[i]);
+            deleteFile(fa[i]);
+        }
+    }
 
-    errorPrint(printFileDir(fd));
+    // удаление массива файлов
+    free(fa);
 
-    errorPrint(deleteFileDir(fd));
+    return OK;
+}
+
+// расчет количества файлов
+int countFiles(const char *fpath, const struct stat *sb,
+               int tflag, struct FTW *ftwbuf)
+{
+    // если текущий элемент - файл
+    // увеличиваем количество файлов
+    if(tflag == FTW_F)
+    {
+        // ВРЕМЕННАЯ ПЕЧАТЬ
+        printf("LEVEL:<%2d> SIZE:<%7d> FPATH:<%-90s> NAME:<%s>\n",
+            ftwbuf->level, (int)sb->st_size, fpath, fpath + ftwbuf->base);
+
+        f_size++;
+    }
+    return OK;
+}
+
+// добавление файлов в список файлов
+int addFile(const char *fpath, const struct stat *sb,
+            int tflag, struct FTW *ftwbuf)
+{
+    // если текущий элемент - файл
+    // добавляем его в массив
+    if(tflag == FTW_F)
+    {
+        File* f = files[f_ind++] = createFile();
+
+        errorPrint(setFilepath(f, fpath));
+        errorPrint(openInputFile(f));
+        errorPrint(readFileSize(f));
+        errorPrint(readFileBuffer(f));
+    }
+
+    return OK;
+}
+
+#define MAX_FILES_IN_ARCHIVE 200
+
+// создание списка файлов
+File** initializeFileArr(char* path)
+{
+    // считаю количество файлов в директории и поддиректориях
+    f_ind = 0;
+    nftw(path, countFiles, MAX_FILES_IN_ARCHIVE, FTW_CHDIR);
+
+    // выделяю память под массив файлов
+    files = createFileArr(f_size);
+
+    // считываю файлы
+    f_ind = 0;
+    nftw(path, addFile, MAX_FILES_IN_ARCHIVE, FTW_CHDIR);
+
+    f_ind = 0;
+    return files;
+}
+
+// печать файлового массива
+int printFileArr(File** fa)
+{
+    // если списка файлов не существует 
+    if(fa == NULL)
+    {
+        return FARR_DOESNT_EXIST;
+    }
+
+    // проходимся по каждому элементу массива и печатаем его
+    // если он существует
+    for(int i = 0; i < f_size; i++)
+    {        
+        errorPrint(printFile(fa[i]));
+    }
+
+    return OK;
 }
 
 int main(int argc, char** argv)
@@ -305,18 +438,28 @@ int main(int argc, char** argv)
     //testFileFunc(argc, argv);
 
     // тестирование считывания файлов из директории
-    testFileDirRead(argc, argv);
+    // testFileDirRead(argc, argv);
+
+    // переключение директории с помощью chdir для каждого элемента директории
+    // int flags = FTW_CHDIR;
+
+    // if (argc > 2 && strchr(argv[2], 'd') != NULL)
+    //     flags |= FTW_DEPTH;
+    // if (argc > 2 && strchr(argv[2], 'p') != NULL)
+    //     flags |= FTW_PHYS;
+
+    // if (nftw((argc < 2) ? "." : argv[1], display_info, MAX_FILES_IN_ARCHIVE, flags)
+    //         == -1) {
+    //     perror("nftw");
+    //     exit(EXIT_FAILURE);
+    // }
 
 
-    //testReadInputFile(argc, argv);
-    //listDir(argv[1], 0);
-    
+    File** fa = initializeFileArr(argv[1]);
 
-    //for(int i = 0; i < ptr;i++)
-    //{
-    //    printf("путь: \"%s\", размер \"%d\"\n", files[i]->m_path, files[i]->m_size);
-    //    deleteFile(files[i]);
-    //}
+    printFileArr(fa);
 
-    return 0;
+    deleteFileArr(fa);
+
+    exit(EXIT_SUCCESS);
 }

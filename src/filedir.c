@@ -138,6 +138,17 @@ int countFilesInDirectory(FileDir *fd)
             // увеличиваем количество файлов
             fd->m_length++;
         }
+        // если текущий элемент - папка
+        //else if(S_ISDIR(statbuf.st_mode))
+        //{
+        //    // игнорируем каталоги "." и ".."
+        //    if(strcmp(".",entry->d_name) == 0 ||
+        //       strcmp("..", entry->d_name) == 0)
+        //        continue;
+        //    
+        //    //// рекурсивное определение количества файлов
+        //    //countFilesInDirectory(fd);
+        //}
     }
 
     // пытаемся вернуться в директорию выше
@@ -241,7 +252,7 @@ int readFilesInDir(FileDir *fd)
             char* full_path = (char*)calloc(size, sizeof(char));
             snprintf(full_path, size, "%s/%s", fd->m_path, entry->d_name);
 
-            errorPrint(setFilepath(f, full_path));
+            errorPrint(setFilepath(f, entry->d_name));
             errorPrint(openInputFile(f));
             errorPrint(readFileSize(f));
             errorPrint(readFileBuffer(f));
