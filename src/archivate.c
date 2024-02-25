@@ -304,35 +304,104 @@ void testFileFunc(int argc, char** argv)
 //     return 0;           /* To tell nftw() to continue */
 // }
 
+void createHeader(File* out)
+{
+    // шапка
+    // [file count]
+    // [path size][path][buffer size]
+    // ...
+    // [path size][path][buffer size]
+
+    // запись количества файлов
+    write(out->m_id, &f_size, sizeof(f_size));
+
+    // проходимся по всем файлам
+    for(int i = 0; i < f_size; i++) 
+    {
+        // записываем размер пути
+        write(out->m_id, &files[i]->m_path_size, sizeof(size_t));
+        // записываем путь к файлу
+        write(out->m_id, files[i]->m_path, files[i]->m_path_size);
+        // записываем размер буфера
+        write(out->m_id, &files[i]->m_size, sizeof(size_t));
+    }
+}
+
+void createBody(File* out)
+{
+    // тело
+    // [buffer]
+    // ...
+    // [buffer]
+
+    // проходимся по всем файлам
+    for(int i = 0; i < f_size; i++)
+    {
+        // записываем буфер
+        write(out->m_id, files[i]->m_buffer, files[i]->m_size);
+    }
+}
+
+// функция создания архива
+int archivate(int argc, char** argv)
+{
+    // в аргументах должен быт путь к папке, которую надо заархивировать
+    // и путь к файлу, в который надо выгрузить архив
+    if(argc < 3)
+    {
+        printf("должно быть больше аргументов \n");
+        return 1;
+    }
+
+    // создание массива с файлами
+    initializeFileArr(argv[1]);
+
+    // печать массива с файлами
+    printFileArr(files);
+
+    // создание выходного файла
+    File* f = createFile();
+
+    // создаю дескриптор выходного файла
+    errorPrint(setFilepath(f, argv[2]));
+    errorPrint(openOutputFile(f));
+
+    // печать выходнго файла
+    errorPrint(printFile(f));
+
+    // запись шапки в буфер выходного файла
+    createHeader(f);
+
+    // выгрузка шапки
+    errorPrint(writeFile(f));
+
+    // запись тела в буфер выходного файла
+    createBody(f);
+
+    // выгрузка тела
+    errorPrint(writeFile(f));
+
+    // удаление выходного файла
+    errorPrint(closeFile(f));
+    deleteFile(f);
+
+    // удаление массива с файлами
+    deleteFileArr(files);
+
+    return 0;
+}
+
+void dearchivate(int argv, char** argc)
+{
+
+}
 
 int main(int argc, char** argv)
 {
-    // тестирование файловых функций
-    //testFileFunc(argc, argv);
+    // сохранение базовой папки
+    base_folder = argv[1];
 
-    // тестирование считывания файлов из директории
-    // testFileDirRead(argc, argv);
+    //archivate(argc, argv);
 
-    // переключение директории с помощью chdir для каждого элемента директории
-    // int flags = FTW_CHDIR;
-
-    // if (argc > 2 && strchr(argv[2], 'd') != NULL)
-    //     flags |= FTW_DEPTH;
-    // if (argc > 2 && strchr(argv[2], 'p') != NULL)
-    //     flags |= FTW_PHYS;
-
-    // if (nftw((argc < 2) ? "." : argv[1], display_info, MAX_FILES_IN_ARCHIVE, flags)
-    //         == -1) {
-    //     perror("nftw");
-    //     exit(EXIT_FAILURE);
-    // }
-
-
-    File** fa = initializeFileArr(argv[1]);
-
-    printFileArr(fa);
-
-    deleteFileArr(fa);
-
-    exit(EXIT_SUCCESS);
+    return 0;
 }

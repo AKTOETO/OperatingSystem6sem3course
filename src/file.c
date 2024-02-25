@@ -12,6 +12,7 @@ File* createFile()
     f->m_buffer = NULL;
     f->m_size = -1;
     f->m_path = NULL;
+    f->m_path_size = -1;
 
     return f;
 }
@@ -23,22 +24,23 @@ int printFile(File* f)
     FILE_EXISTANCE;
 
     // если есть путь
-    FILE_PATH_EXISTANCE;
+    //FILE_PATH_EXISTANCE;
 
     // если есть дескриптор файла
-    FILE_DESCRIPTOR_EXISTANCE;
+    //FILE_DESCRIPTOR_EXISTANCE;
 
     // если есть размер файла
-    FILE_SIZE_EXISTANCE;
+    //FILE_SIZE_EXISTANCE;
 
     // если есть буфер файла
-    FILE_BUFER_EXISTANCE;
+    //FILE_BUFER_EXISTANCE;
 
     printf("\nFILE INFO\n");
-    printf("path  : <%s>\n", f->m_path);
-    printf("id    : <%d>\n", f->m_id);
-    printf("size  : <%d>\n", f->m_size);
-    printf("buffer: <%s>\n", f->m_buffer);
+    printf("path   : <%s>\n", f->m_path);
+    printf("path sz: <%ld>\n", f->m_path_size);
+    printf("id     : <%d>\n", f->m_id);
+    printf("size   : <%ld>\n", f->m_size);
+    printf("buffer : <%s>\n", f->m_buffer);
 
     return OK;
 }
@@ -64,11 +66,31 @@ int setFilepath(File* f, const char* path)
     // если файл не создан
     FILE_EXISTANCE;
 
+    // сохранение размера пути
+    f->m_path_size = strlen(path) + 1;
+
     // сохранение файлового пути
-    f->m_path = realloc(f->m_path, strlen(path) + 1);
+    f->m_path = realloc(f->m_path, f->m_path_size);
 
     // копирование переданного пути в f->m_path
     strcpy(f->m_path, path);
+
+    return OK;
+}
+
+int setFileBuffer(File *f, const char *buffer)
+{
+    // если файл не создан
+    FILE_EXISTANCE;
+
+    // сохранение размера буфера
+    f->m_size = strlen(buffer) + 1;
+
+    // выделение памяти под буфер
+    f->m_buffer = realloc(f->m_buffer, f->m_size);
+
+    // копирование буфера
+    strcpy(f->m_buffer, buffer);
 
     return OK;
 }

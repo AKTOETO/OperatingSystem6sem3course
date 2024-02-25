@@ -12,6 +12,9 @@ extern int f_size;
 // текущий файл
 extern int f_ind;
 
+// базовая папка
+extern char* base_folder;
+
 // создание списка файлов
 File** createFileArr(int size);
 

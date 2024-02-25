@@ -23,17 +23,8 @@
 #define FILE_HAS_NO_BUFFER          (1 << 5)
 #define FILE_INCORRECT_INPUT_SIZE   (1 << 6)
 #define FILE_INCORRECT_OUTPUT_SIZE  (1 << 7)
-// ДИРЕКТОРИИ
-#define FDIR_DOESNT_EXIST           (1 << 8)
-#define FDIR_COULDNT_CREATE_DIR     (1 << 9)
-#define FDIR_PATH_DOESNT_EXIST      (1 << 10)
-#define FDIR_COULDNT_CHANGE_DIR     (1 << 11)
-#define FDIR_COULDNT_CLOSE_DIR      (1 << 12)
-#define FDIR_FILES_DOESNT_EXIST     (1 << 13)
-#define FDIR_COULDNT_CREATE_FILES   (1 << 14)
-#define FDIR_FILE_COUNT_IS_0        (1 << 15)
 // ФАЙЛОВЫЙ МАССИВ
-#define FARR_DOESNT_EXIST           (1 << 16)
+#define FARR_DOESNT_EXIST           (1 << 8)
 
 // расшифровка сообщений об ошибках
 #define STR(str) #str

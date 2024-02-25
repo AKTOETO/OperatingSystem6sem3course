@@ -1,5 +1,7 @@
 #include "filedir.h"
 
+// расположение изначальной папки
+char* base_folder;
 // список файлов
 File** files = NULL;
 // количество файлов
@@ -19,7 +21,7 @@ int deleteFileArr(File** fa)
     // если списка файлов не существует 
     if(fa == NULL)
     {
-        return FARR_DOESNT_EXIST;
+        fa = files;
     }
 
     // проходимся по всему списку файлов
@@ -48,8 +50,8 @@ int countFiles(const char *fpath, const struct stat *sb,
     if(tflag == FTW_F)
     {
         // ВРЕМЕННАЯ ПЕЧАТЬ
-        printf("LEVEL:<%2d> SIZE:<%7d> FPATH:<%-90s> NAME:<%s>\n",
-            ftwbuf->level, (int)sb->st_size, fpath, fpath + ftwbuf->base);
+        //printf("LEVEL:<%2d> SIZE:<%7d> FPATH:<%-90s> NAME:<%s>\n",
+        //    ftwbuf->level, (int)sb->st_size, fpath, fpath + ftwbuf->base);
 
         f_size++;
     }
@@ -70,6 +72,11 @@ int addFile(const char *fpath, const struct stat *sb,
         errorPrint(openInputFile(f));
         errorPrint(readFileSize(f));
         errorPrint(readFileBuffer(f));
+
+        // изменение пути файла
+        char new_path[100];
+        strncpy(new_path, f->m_path + strlen(base_folder), f->m_path_size - strlen(base_folder));
+        errorPrint(setFilepath(f, new_path));
     }
 
     return OK;
@@ -99,7 +106,7 @@ int printFileArr(File** fa)
     // если списка файлов не существует 
     if(fa == NULL)
     {
-        return FARR_DOESNT_EXIST;
+        fa = files;
     }
 
     // проходимся по каждому элементу массива и печатаем его
