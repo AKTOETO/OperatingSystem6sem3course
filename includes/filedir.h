@@ -3,40 +3,36 @@
 
 #include "file.h"
 
-// структура, содержащая список файлов в директории
-typedef struct 
-{
-    // полный путь до директории
-    const char* m_path;
+// список файлов
+extern File** files;
 
-    // количество файлов
-    int m_length;
+// количество файлов
+extern int f_size;
 
-    // массив файлов
-    File** m_files;
+// текущий файл
+extern int f_ind;
 
-} FileDir;
+// создание списка файлов
+File** createFileArr(int size);
 
-// печать FileDir
-int printFileDir(FileDir* fd);
+// удаление списка файлов
+int deleteFileArr(File** fa);
 
-// создание директории с файлами
-FileDir* createFileDir();
+// расчет количества файлов
+int countFiles(const char *fpath, const struct stat *sb,
+               int tflag, struct FTW *ftwbuf);
 
-// удаление директории с файлами
-int deleteFileDir(FileDir* fd);
+// добавление файлов в список файлов
+int addFile(const char *fpath, const struct stat *sb,
+            int tflag, struct FTW *ftwbuf);
 
-// установить директорию для каталога
-int setPath(FileDir* fd, const char* path);
+#define MAX_FILES_IN_ARCHIVE 200
 
-// получение количества файлов в директории
-int countFilesInDirectory(FileDir* fd);
+// создание списка файлов
+File** initializeFileArr(char* path);
 
-// выделение памяти под массив файлов
-int allocateFileArray(FileDir* fd);
-
-// чтение файлов
-int readFilesInDir(FileDir* fd);
+// печать файлового массива
+int printFileArr(File** fa);
 
 
 #endif // !FILEDIR_H

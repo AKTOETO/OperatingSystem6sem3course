@@ -1,6 +1,8 @@
 #ifndef ERRORS_H
 #define ERRORS_H
 
+#define _XOPEN_SOURCE 500 // для подключения новых функций стандарта POSIX
+                          // nftw
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -9,6 +11,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <dirent.h>
+#include <ftw.h>        // nftw
 
 // возможные ошибки при работе программы
 #define OK                          (0)
