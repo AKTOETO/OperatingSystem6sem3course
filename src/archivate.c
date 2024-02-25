@@ -304,7 +304,7 @@ void testFileFunc(int argc, char** argv)
 //     return 0;           /* To tell nftw() to continue */
 // }
 
-void createHeader(File* out)
+void writeHeader(File* out)
 {
     // шапка
     // [file count]
@@ -327,7 +327,7 @@ void createHeader(File* out)
     }
 }
 
-void createBody(File* out)
+void writeBody(File* out)
 {
     // тело
     // [buffer]
@@ -342,10 +342,56 @@ void createBody(File* out)
     }
 }
 
+// считать заголовок
+void readHeader(File* in)
+{
+    // считывание количества файлов
+    read(in->m_id, &f_size, sizeof(f_size));
+
+    // создание массива файлов
+    files = createFileArr(f_size);
+
+    // считывание информации о файлах
+    for(int i = 0; i < f_size; i++)
+    {
+        // создание файла
+        File *out = files[i] = createFile();
+
+        // установка размера пути
+        read(in->m_id, &out->m_path_size, sizeof(size_t));
+
+        // выделение памяти под строку
+        out->m_path = realloc(out->m_path, out->m_path_size);
+
+        // установка пути
+        read(in->m_id, out->m_path, out->m_path_size);
+
+        // установка размера буфера
+        read(in->m_id, &out->m_size, sizeof(size_t));
+    }
+}
+
+// чтение тела файла
+void readBody(File* in)
+{
+    // проходимся по всем файлам
+    for(int i = 0; i < f_size; i++)
+    {
+        // выделение памяти под буфер
+        files[i]->m_buffer = malloc(files[i]->m_size + 1);
+
+        // считываем буфер
+        read(in->m_id, files[i]->m_buffer, files[i]->m_size);
+
+        // конец строки
+        files[i]->m_buffer[files[i]->m_size] = '\0';
+    }
+}
+
 // функция создания архива
 int archivate(int argc, char** argv)
 {
-    // в аргументах должен быт путь к папке, которую надо заархивировать
+    // в аргументах должен быть путь к папке, которую надо заархивировать
     // и путь к файлу, в который надо выгрузить архив
     if(argc < 3)
     {
@@ -353,8 +399,10 @@ int archivate(int argc, char** argv)
         return 1;
     }
 
+    base_folder = argv[1];
+
     // создание массива с файлами
-    initializeFileArr(argv[1]);
+    fillFileArrFromDir(argv[1]);
 
     // печать массива с файлами
     printFileArr(files);
@@ -370,13 +418,13 @@ int archivate(int argc, char** argv)
     errorPrint(printFile(f));
 
     // запись шапки в буфер выходного файла
-    createHeader(f);
+    writeHeader(f);
 
     // выгрузка шапки
     errorPrint(writeFile(f));
 
     // запись тела в буфер выходного файла
-    createBody(f);
+    writeBody(f);
 
     // выгрузка тела
     errorPrint(writeFile(f));
@@ -388,20 +436,73 @@ int archivate(int argc, char** argv)
     // удаление массива с файлами
     deleteFileArr(files);
 
-    return 0;
+    return OK;
 }
 
-void dearchivate(int argv, char** argc)
+int dearchivate(int argc, char** argv)
 {
+    // в аргументах должен быть путь к архиву
+    // и путь к папке, в которую надо разархивировать
+    if(argc < 3)
+    {
+        printf("должно быть больше аргументов \n");
+        return 1;
+    }
 
+    // сохранение пути, в который надо разахивировать
+    base_folder = argv[2];
+
+    // открыть архивный файл
+    File *f = createFile();
+    errorPrint(setFilepath(f, argv[1]));
+    errorPrint(openInputFile(f));
+    errorPrint(readFileSize(f));
+    
+    // считать заголовок 
+    // > в нем будет создание списка файлов
+    // > считывание размера каждого файла
+    // > считывание размера пути файла
+    // > считывание пути файла
+    readHeader(f);
+
+    // считывание тела
+    readBody(f);
+    errorPrint(printFileArr(files));
+
+    // печать файлов в файловую систему
+    fillDirFromFileArr(files);
+ 
+    // // закрыть архивный файл
+    closeFile(f);
+    deleteFile(f);
+
+    // удаление массива с файлами
+    deleteFileArr(files);
+
+    return OK;
 }
+
+
 
 int main(int argc, char** argv)
 {
     // сохранение базовой папки
-    base_folder = argv[1];
+    //base_folder = argv[1];
 
-    //archivate(argc, argv);
+    if(argc < 4)
+    {
+        printf("[folder/filepath][filepath/folder][a/d]\n");
+    }
 
+    if(argv[3][0] == 'a')
+    {
+        printf("archivating folder <%s> in file <%s>\n", argv[1], argv[2]);
+        archivate(argc, argv);
+    }
+
+    else if(argv[3][0] == 'd')
+        dearchivate(argc, argv);
+
+    
     return 0;
 }

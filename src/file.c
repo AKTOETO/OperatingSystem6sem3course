@@ -42,12 +42,19 @@ int printFile(File* f)
     printf("size   : <%ld>\n", f->m_size);
     printf("buffer : <%s>\n", f->m_buffer);
 
+    // for(size_t i = 0; i < 100; i++)
+    // {
+    //     printf("%c", f->m_buffer[i]);
+    // }
+
     return OK;
 }
 
 // удаление файла
-void deleteFile(File* f)
+int deleteFile(File* f)
 {
+    FILE_EXISTANCE;
+
     // удаление буфера
     if(f->m_buffer != NULL)
         free(f->m_buffer);
@@ -58,6 +65,8 @@ void deleteFile(File* f)
 
     // удаление структуры файла
     free(f);
+
+    return OK;
 }
 
 // установить файловый путь 
@@ -212,6 +221,10 @@ int writeFile(File *f)
     {
         return FILE_INCORRECT_OUTPUT_SIZE;
     }
+    else
+    {
+        printf("file <%s> written\n", f->m_path);
+    } 
 
     return OK;
 }

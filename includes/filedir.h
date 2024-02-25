@@ -32,10 +32,21 @@ int addFile(const char *fpath, const struct stat *sb,
 #define MAX_FILES_IN_ARCHIVE 200
 
 // создание списка файлов
-File** initializeFileArr(char* path);
+File** fillFileArrFromDir(char* path);
 
 // печать файлового массива
 int printFileArr(File** fa);
 
+// создание директории, в которой должен быть файл
+char* createFileDir(const char* dir);
+
+// рекурсивное создание папок
+void recursiveMkdir(char *path);
+
+// разархивирование одного файла
+void dearchivateFile(File* f);
+
+// заполнение файловой системы файлами
+void fillDirFromFileArr(File** fa);
 
 #endif // !FILEDIR_H

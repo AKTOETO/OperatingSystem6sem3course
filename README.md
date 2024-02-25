@@ -9,23 +9,50 @@
 Читать: 
 >Глава 3. Работа с файлами.
 
+# ИСПОЛЬЗОВАНИЕ
+У программы есть два ключа `a` и `d`. Первый создаст архив, второй разархивирует существующий.
+
+**Параметры ключей:**
+- `a [folder] [filepath]`, где _folder_ - папка, которую надо заархивировать, _filepath_ - путь к файлу, куда положить архив.
+- `d [filepath] [folder]`, где _folder_ - папка, в которую надо разархивировать архив, _filepath_ - путь к архивному файлу.
+
+**ПРИМЕР**
+```
+./build/archivator ~/Documents/projects/MAI/OS/files/archivate/input ~/Documents/projects/MAI/OS/files/archivate/output/arch.bin a 
+```
+Эта команда создаст архив _arch.bin_
+
+```
+./build/archivator ~/Documents/projects/MAI/OS/files/archivate/output/arch.bin ~/Documents/projects/MAI/OS/files/dearchivate/output d
+```
+
+Эта команда разархивирует архив _arch.bin_ в папку _~/Documents/projects/MAI/OS/files/dearchivate/output_
+
+
 ## Решение
 
 **Структура заархивированного файла**
+
+Шапка
 ```
-[number of files]
-[file name]
-[file size]
+[file count]
+[path size][path][buffer size]
 ...
-[file name]
-[file size]
-[file data]...[file data]
+[path size][path][buffer size]
 ```
+Тело
+```
+[buffer]
+...    
+[buffer]
+```
+
 Где:
-1. `number of files` - количество заархивированных файлов;
-2. `file name` - имя файла;
-3. `file size` - размер файла в байтах;
-4. `file data` - информация в файле.
+1. `file count` - количество заархивированных файлов;
+2. `path size` - размер пути до файла
+2. `path` - путь до файла;
+3. `buffer size` - размер буфера каждого заархивированного файла в байтах;
+4. `buffer` - буфер каждого файла.
 
 ## Алгоритм поиска файлов в каталоге
 1. Считаю количество файлов в каталоге;

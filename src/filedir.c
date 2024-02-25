@@ -66,6 +66,9 @@ int addFile(const char *fpath, const struct stat *sb,
     // добавляем его в массив
     if(tflag == FTW_F)
     {
+        if(!files)
+            printf("there is no files %p\n", files);
+
         File* f = files[f_ind++] = createFile();
 
         errorPrint(setFilepath(f, fpath));
@@ -83,7 +86,7 @@ int addFile(const char *fpath, const struct stat *sb,
 }
 
 // создание списка файлов
-File** initializeFileArr(char* path)
+File** fillFileArrFromDir(char* path)
 {
     // считаю количество файлов в директории и поддиректориях
     f_ind = 0;
@@ -109,6 +112,8 @@ int printFileArr(File** fa)
         fa = files;
     }
 
+    printf("FILES: \n");
+
     // проходимся по каждому элементу массива и печатаем его
     // если он существует
     for(int i = 0; i < f_size; i++)
@@ -117,4 +122,82 @@ int printFileArr(File** fa)
     }
 
     return OK;
+}
+
+
+// создание директории, в которой должен быть файл
+char* createFileDir(const char* dir)
+{
+    // поиск позиции имени файла
+    size_t i = strlen(dir) - 1;
+    for(; i > 0;)
+    {
+        if(dir[i] == '/') 
+        {
+            break;
+        }
+        else i--;
+    }
+
+    return strndup(dir, i+1);
+}
+
+// рекурсивное создание папок
+void recursiveMkdir(char *path)
+{
+    char *sep = strrchr(path, '/');
+    if(sep != NULL) {
+        *sep = 0;
+        recursiveMkdir(path);
+        *sep = '/';
+    }
+    if(mkdir(path, 0777) == -1)
+    {
+        printf("error creating path: %s\n", path);
+    }
+    else
+    {
+        printf("path created: %s\n", path);
+    }
+}
+
+void dearchivateFile(File *f)
+{
+    // полный путь до файла
+    size_t full_path_size = strlen(base_folder) + f->m_path_size + 1;
+    char* full_path = malloc(full_path_size + 1);
+    snprintf(full_path, full_path_size, "%s/%s", base_folder, f->m_path);
+    full_path[full_path_size] = 0;
+    printf("full path: <%s>\n", full_path);
+
+    // проверяем существует ли папка
+    char* file_dir = createFileDir(full_path);
+    struct stat st;
+    if(stat(file_dir, &st) == -1)
+    {
+        // создаем папку, если не существует
+        recursiveMkdir(file_dir);
+    }
+    free(file_dir);
+
+    // создаем файл
+    errorPrint(setFilepath(f, full_path));
+
+    // создаем дескриптор
+    errorPrint(openOutputFile(f));
+
+    // печатаем буфер в файл
+    errorPrint(writeFile(f));
+
+    free(full_path);
+    closeFile(f);
+}
+
+void fillDirFromFileArr(File **fa)
+{
+    // проходимся по всем файлам и выводим их 
+    for(int i = 0; i < f_size; i++)
+    {
+        dearchivateFile(files[i]);
+    }
 }

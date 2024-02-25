@@ -34,7 +34,7 @@ int printFile(File* f);
 File* createFile();
 
 // удаление файла
-void deleteFile(File* f);
+int deleteFile(File* f);
 
 // установить файловый путь 
 int setFilepath(File* f, const char* path);

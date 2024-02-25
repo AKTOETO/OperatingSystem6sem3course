@@ -3,6 +3,8 @@
 
 #define _XOPEN_SOURCE 500 // для подключения новых функций стандарта POSIX
                           // nftw
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
