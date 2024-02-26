@@ -77,7 +77,8 @@ int addFile(const char *fpath, const struct stat *sb,
         errorPrint(readFileBuffer(f));
 
         // изменение пути файла
-        char new_path[100];
+        // TODO do dynamic allocation of new_path
+        char new_path[200];
         strncpy(new_path, f->m_path + strlen(base_folder), f->m_path_size - strlen(base_folder));
         errorPrint(setFilepath(f, new_path));
     }

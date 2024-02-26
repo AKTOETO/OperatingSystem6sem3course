@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 project(archivator)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fsanitize=address")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fsanitize=address -std=c11")
 
 # all .c
 file(GLOB_RECURSE SRC ${PROJECT_SOURCE_DIR}/src/*.c)
