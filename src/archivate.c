@@ -116,14 +116,8 @@ int archivate(int argc, char** argv)
     // запись шапки в буфер выходного файла
     writeHeader(f);
 
-    // выгрузка шапки
-    errorPrint(writeFile(f));
-
     // запись тела в буфер выходного файла
     writeBody(f);
-
-    // выгрузка тела
-    errorPrint(writeFile(f));
 
     // удаление выходного файла
     errorPrint(closeFile(f));
@@ -168,7 +162,7 @@ int dearchivate(int argc, char** argv)
     // печать файлов в файловую систему
     fillDirFromFileArr(files);
  
-    // // закрыть архивный файл
+    // закрыть архивный файл
     closeFile(f);
     deleteFile(f);
 
