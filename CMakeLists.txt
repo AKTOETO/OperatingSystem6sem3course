@@ -12,3 +12,6 @@ file(GLOB_RECURSE HDRS ${PROJECT_SOURCE_DIR}/includes/*.h)
 add_executable(${CMAKE_PROJECT_NAME} ${SRC} ${HDRS})
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/includes)
+
+# cmake -B build . && cmake --build build
+# ./build/archivate 
