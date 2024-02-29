@@ -19,11 +19,11 @@ typedef struct
 } File;
 
 // проверки для выполнения
-#define FILE_EXISTANCE              if(f == NULL) return FILE_DOESNT_EXIST
-#define FILE_PATH_EXISTANCE         if(f->m_path == NULL)return FILE_HAS_NO_PATH
-#define FILE_DESCRIPTOR_EXISTANCE   if(f->m_id == -1)return FILE_HAS_NO_DESCRIPTOR
-#define FILE_SIZE_EXISTANCE         if(f->m_size == -1)return FILE_HAS_NO_SIZE
-#define FILE_BUFER_EXISTANCE        if(f->m_buffer == NULL)return FILE_HAS_NO_BUFFER
+#define FILE_EXISTANCE              {if(f == NULL) ERRORS("файл не существует")}
+#define FILE_PATH_EXISTANCE         {if(f->m_path == NULL) ERRORS("у файла нет пути")}
+#define FILE_DESCRIPTOR_EXISTANCE   {if(f->m_id == -1) ERRORS("у файла нет дескриптора")}
+#define FILE_SIZE_EXISTANCE         {if(f->m_size == -1) ERRORS("у файла нет размера")}
+#define FILE_BUFER_EXISTANCE        {if(f->m_buffer == NULL) ERRORS("у файла нет буфера")}
 
 
 // печать информации о файле

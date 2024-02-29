@@ -71,16 +71,16 @@ int addFile(const char *fpath, const struct stat *sb,
 
         File* f = files[f_ind++] = createFile();
 
-        errorPrint(setFilepath(f, fpath));
-        errorPrint(openInputFile(f));
-        errorPrint(readFileSize(f));
-        errorPrint(readFileBuffer(f));
+        setFilepath(f, fpath);
+        openInputFile(f);
+        readFileSize(f);
+        readFileBuffer(f);
 
         // изменение пути файла
         // TODO do dynamic allocation of new_path
         char new_path[200];
         strncpy(new_path, f->m_path + strlen(base_folder), f->m_path_size - strlen(base_folder));
-        errorPrint(setFilepath(f, new_path));
+        setFilepath(f, new_path);
     }
 
     return OK;
@@ -119,7 +119,7 @@ int printFileArr(File** fa)
     // если он существует
     for(int i = 0; i < f_size; i++)
     {        
-        errorPrint(printFile(fa[i]));
+        printFile(fa[i]);
     }
 
     return OK;
@@ -182,13 +182,13 @@ void dearchivateFile(File *f)
     free(file_dir);
 
     // создаем файл
-    errorPrint(setFilepath(f, full_path));
+    setFilepath(f, full_path);
 
     // создаем дескриптор
-    errorPrint(openOutputFile(f));
+    openOutputFile(f);
 
     // печатаем буфер в файл
-    errorPrint(writeFile(f));
+    writeFile(f);
 
     free(full_path);
     closeFile(f);

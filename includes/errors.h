@@ -7,7 +7,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <unistd.h>
+#include <errno.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <string.h>
@@ -15,25 +17,33 @@
 #include <dirent.h>
 #include <ftw.h>        // nftw
 
-// возможные ошибки при работе программы
-#define OK                          (0)
-// ФАЙЛЫ
-#define FILE_DOESNT_EXIST           (1 << 1)
-#define FILE_HAS_NO_DESCRIPTOR      (1 << 2)
-#define FILE_HAS_NO_PATH            (1 << 3)
-#define FILE_HAS_NO_SIZE            (1 << 4)
-#define FILE_HAS_NO_BUFFER          (1 << 5)
-#define FILE_INCORRECT_INPUT_SIZE   (1 << 6)
-#define FILE_INCORRECT_OUTPUT_SIZE  (1 << 7)
-// ФАЙЛОВЫЙ МАССИВ
-#define FARR_DOESNT_EXIST           (1 << 8)
+// нет ошибок
+#define OK EXIT_SUCCESS
 
-// расшифровка сообщений об ошибках
+// поиск имени файла
+size_t findFileNamePos(const char* str);
+
+// печать справочной информации
+void printLog(
+    FILE *out_stream, const char* file,
+    int line, const char* type);
+
 #define STR(str) #str
-#define CR_ERR_MSG(str, src, er_code) \
-if(src & er_code)str = #er_code;
+#define INFO(format, ...)\
+    printLog(stdout, __FILE__, __LINE__, STR(INFO));\
+    fprintf(stdout, format, __VA_ARGS__);
 
-// функция печати ошибок
-void errorPrint(int er);
+#define ERROR(format, ...)\
+    printLog(stderr, __FILE__, __LINE__, STR(ERROR));\
+    fprintf(stderr, format, __VA_ARGS__);\
+    return EXIT_FAILURE;
+
+#define INFOS(str) INFO("%s\n", str);
+#define INFOD(num) INFO("%d\n", num);
+#define INFOF(num) INFO("%f\n", num);
+
+#define ERRORS(str) ERROR("%s\n", str);
+#define ERRORD(num) ERROR("%d\n", num);
+#define ERRORF(num) ERROR("%F\n", num);
 
 #endif // !ERRORS_H

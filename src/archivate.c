@@ -107,11 +107,11 @@ int archivate(int argc, char** argv)
     File* f = createFile();
 
     // создаю дескриптор выходного файла
-    errorPrint(setFilepath(f, argv[2]));
-    errorPrint(openOutputFile(f));
+    setFilepath(f, argv[2]);
+    openOutputFile(f);
 
     // печать выходнго файла
-    errorPrint(printFile(f));
+    printFile(f);
 
     // запись шапки в буфер выходного файла
     writeHeader(f);
@@ -120,7 +120,7 @@ int archivate(int argc, char** argv)
     writeBody(f);
 
     // удаление выходного файла
-    errorPrint(closeFile(f));
+    closeFile(f);
     deleteFile(f);
 
     // удаление массива с файлами
@@ -144,9 +144,9 @@ int dearchivate(int argc, char** argv)
 
     // открыть архивный файл
     File *f = createFile();
-    errorPrint(setFilepath(f, argv[1]));
-    errorPrint(openInputFile(f));
-    errorPrint(readFileSize(f));
+    setFilepath(f, argv[1]);
+    openInputFile(f);
+    readFileSize(f);
     
     // считать заголовок 
     // > в нем будет создание списка файлов
@@ -157,7 +157,7 @@ int dearchivate(int argc, char** argv)
 
     // считывание тела
     readBody(f);
-    errorPrint(printFileArr(files));
+    printFileArr(files);
 
     // печать файлов в файловую систему
     fillDirFromFileArr(files);
@@ -178,8 +178,7 @@ int main(int argc, char** argv)
 {
     if(argc < 4)
     {
-        printf("Мало аргументов, должно быть так:\n");
-        printf("[folder/filepath][filepath/folder][a/d]\n");
+        ERRORS("мало аргументов, должно быть так: \n\t[folder/filepath][filepath/folder][a/d]\n")
     }
 
     if(argv[3][0] == 'a')

@@ -197,7 +197,7 @@ int readFileBuffer(File* f)
     // выводим ошибку
     if(read_size != f->m_size)
     {
-        return FILE_INCORRECT_INPUT_SIZE;
+        return EXIT_FAILURE;
     }
 
     return OK;
@@ -219,7 +219,7 @@ int writeFile(File *f)
     // значит произошла ошибка
     if(write_bytes == -1 || write_bytes != f->m_size)
     {
-        return FILE_INCORRECT_OUTPUT_SIZE;
+        return EXIT_FAILURE;
     }
     else
     {
