@@ -17,6 +17,11 @@
 #include <dirent.h>
 #include <ftw.h>        // nftw
 
+// цвета сообщений
+#define DEFAULT_WHITE    "\033[0m"
+#define ERROR_BOLD_RED   "\033[1;31m"
+#define INFO_BOLD_YELLOW "\033[1;33m"
+
 // нет ошибок
 #define OK EXIT_SUCCESS
 
@@ -30,13 +35,17 @@ void printLog(
 
 #define STR(str) #str
 #define INFO(format, ...)\
+{\
     printLog(stdout, __FILE__, __LINE__, STR(INFO));\
-    fprintf(stdout, format, __VA_ARGS__);
+    fprintf(stdout, format, __VA_ARGS__);\
+}
 
-#define ERROR(format, ...)\
+#define ERROR(format, ...) \
+{\
     printLog(stderr, __FILE__, __LINE__, STR(ERROR));\
     fprintf(stderr, format, __VA_ARGS__);\
-    return EXIT_FAILURE;
+    return EXIT_FAILURE;\
+}
 
 #define INFOS(str) INFO("%s\n", str);
 #define INFOD(num) INFO("%d\n", num);

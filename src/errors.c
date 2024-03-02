@@ -20,12 +20,14 @@ void printLog(
     int line, const char* type)
 {
     if(strcmp(type, "ERROR") == 0)
-        fprintf(out_stream, "[%-6s][%s][line:%4d][sys er: %s] MSG: ",
-                type, file + findFileNamePos(file), line, strerror(errno));
+        fprintf(out_stream, "[%s%-6s%s][%s][line:%4d][sys er: %s] MSG: ",
+                ERROR_BOLD_RED, type, DEFAULT_WHITE,
+                file + findFileNamePos(file), line, strerror(errno));
 
     else if(strcmp(type, "INFO") == 0)
-        fprintf(out_stream, "[%-6s][%s][line:%4d] MSG: ",
-                type, file + findFileNamePos(file), line);
+        fprintf(out_stream, "[%s%-6s%s][%s][line:%4d] MSG: ",
+                INFO_BOLD_YELLOW, type, DEFAULT_WHITE,
+                file + findFileNamePos(file), line);
 
     else
         fprintf(out_stream, "\n\tНеизвестный тип ошибки <%s>\n", type);
