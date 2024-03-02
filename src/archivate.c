@@ -183,13 +183,21 @@ int main(int argc, char** argv)
 
     if(argv[3][0] == 'a')
     {
-        printf("archivating folder <%s> in file <%s>\n", argv[1], argv[2]);
+        // если второй аргумент не папка, то это ошибка
+        if(!S_ISDIR(getStMode(argv[1])))
+            ERROR("argv[1] = <%s> не является папкой (а должна)\n", argv[1]);
+
+        INFO("archivating folder <%s> in file <%s>\n", argv[1], argv[2])
         archivate(argc, argv);
     }
 
     else if(argv[3][0] == 'd')
     {
-        printf("archivating folder <%s> in file <%s>\n", argv[1], argv[2]);
+        // если второй аргумент не файл, то это ошибка
+        if(!S_ISREG(getStMode(argv[1])))
+            ERROR("argv[1] = <%s> не является файлом (а должен)\n", argv[1]);
+
+        INFO("dearchivating file <%s> in folder <%s>\n", argv[1], argv[2]);
         dearchivate(argc, argv);
     }
     

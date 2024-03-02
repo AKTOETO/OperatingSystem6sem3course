@@ -49,4 +49,10 @@ void dearchivateFile(File* f);
 // заполнение файловой системы файлами
 void fillDirFromFileArr(File** fa);
 
+// ПРОВЕРКИ
+
+// получение значени типа объекта (файл или директория)
+int getStMode(const char *path);
+
+
 #endif // !FILEDIR_H

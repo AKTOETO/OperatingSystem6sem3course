@@ -202,3 +202,16 @@ void fillDirFromFileArr(File **fa)
         dearchivateFile(files[i]);
     }
 }
+
+int getStMode(const char *path)
+{
+    struct stat st;
+    
+    // пытаемся получить информацию об объекте
+    if(lstat(path, &st))
+    {
+        ERROR("Доступ к объекту не был получен: <%s>\n", path);
+    }
+
+    return st.st_mode & S_IFMT;
+}
