@@ -208,10 +208,10 @@ int getStMode(const char *path)
     struct stat st;
     
     // пытаемся получить информацию об объекте
-    if(lstat(path, &st))
+    if(lstat(path, &st) == -1)
     {
         ERROR("Доступ к объекту не был получен: <%s>\n", path);
     }
-
+ 
     return st.st_mode & S_IFMT;
 }
