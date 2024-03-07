@@ -9,11 +9,14 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdbool.h>
-#include <unistd.h>
-#include <errno.h>
+
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
+
+#include <errno.h>
 #include <string.h>
+#include <unistd.h>
 #include <fcntl.h>
 #include <dirent.h>
 #include <ftw.h>        // nftw
@@ -48,12 +51,12 @@ void printLog(
     return EXIT_FAILURE;\
 }
 
-#define INFOS(str) INFO("%s\n", str);
-#define INFOD(num) INFO("%d\n", num);
-#define INFOF(num) INFO("%f\n", num);
+#define INFOS(str) INFO("%s", str);
+#define INFOD(num) INFO("%d", num);
+#define INFOF(num) INFO("%f", num);
 
-#define ERRORS(str) ERROR("%s\n", str);
-#define ERRORD(num) ERROR("%d\n", num);
-#define ERRORF(num) ERROR("%F\n", num);
+#define ERRORS(str) ERROR("%s", str);
+#define ERRORD(num) ERROR("%d", num);
+#define ERRORF(num) ERROR("%F", num);
 
 #endif // !ERRORS_H
