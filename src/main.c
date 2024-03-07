@@ -1,102 +1,46 @@
-#include "errors.h"
+#include "strings.h"
+#define STR_SIZE 256
 
-#define DEFAULT_TOKEN_COUNT 5
-#define TOKEN_DELIMETERS " \n\0"
-
-// чтение строки с консоли
-char* readLine()
+// печать приветствия
+void printHi()
 {
-    // строка
-    char *str = NULL;
-
-    // изначальный размер строки
-    size_t len = 0;
-
-    // размер 
-    ssize_t size = 0;
-
-    // проверка у далось ли считать строку
-    if((size = getline(&str, &len, stdin)) == -1)
+    char buffer[STR_SIZE ];
+    if(getcwd(buffer, STR_SIZE) == NULL)
     {
-        free(str);
-
-        ERRORS("Не удалось считать строку\n");
-        return NULL;
+        ERRORS("Не получилось выяснить рабочую диреткорию\n");
     }
-
-    // удаление ненужного символа переноса строки
-    str[size - 1] = '\0';
-
-    return str;
+    else
+        printf("%s:> ", buffer);
 }
 
-// токенизация строки
-char** tokenizeString(char *str)
+// выполнение процесса
+void launch(char **argv)
 {
-    // начальный размер массива токенов
-    size_t size = DEFAULT_TOKEN_COUNT;
+    pid_t pid;
+    pid = fork();
 
-    // номер элемента после последнего
-    size_t pos = 0;
-
-    // создаем массив токенов
-    char **tokens = (char**)malloc(sizeof(char*) * size);
-
-    // берем первый токен из строки
-    char *token = strtok(str, TOKEN_DELIMETERS);
-
-    // проходимся по всем строке, пока есть токены
-    do
+    if(pid < 0)
     {
-        // вставляем считанных токен в массив токенов
-        tokens[pos++] = token;
-
-        // проверяем, есть ли еще место в массиве токенов, 
-        // если нет - добавляем
-        if(pos >= size)
+        ERRORS("Процесс не был создан\n");
+    }
+    // ребенок
+    else if(pid == 0)
+    {
+        if(execvp(argv[0], argv) == -1)
         {
-            // увеличиваем буфер в2 раза
-            size *= 2;
-
-            // перевыделяем память
-            tokens = (char**)realloc(tokens, sizeof(char*) * size);
-
-            // если не получилось перевыделить память, пишем об этом
-            if(tokens == NULL)
-            {
-                ERRORS("Не получилось перевыделить память под массив токенов\n");
-                return NULL;
-            }
-
+            ERROR("Неизвестная команда: [%s]\n", argv[0]);
         }
-
-        // получение следующего токена
-        token = strtok(NULL, TOKEN_DELIMETERS);
-
-    } while (token != NULL);
-    
-    // добавляем в последний токен NULL для определения 
-    // количества элементов в массиве токенов
-    tokens[pos] = '\0';    
-
-    return tokens;
-}
-
-// печать токенов
-void printTokens(char **argv)
-{
-    if(!argv)
-    {
-        ERRORS("Массив токенов не существует\n");
-        return;
     }
-    size_t pos = 0;
-    
-    // первый токен
-    //char *token = argv[pos];
-    while(argv[pos])
+    // родитель
+    else
     {
-        INFO("\tТокены: [%s]\n", argv[pos++]);
+        // сохраняем pid ребенка
+        // обрабатываем background
+        // и foreground процессы отдельно
+        if(waitpid(pid, NULL, 0) == -1)
+        {
+            ERRORS("Что-то пошло не так с закрытием дочернего процесса o_0\n");
+        }
     }
 }
 
@@ -107,10 +51,13 @@ int main()
 
     while(true)
     {
+        printHi();
+
         // считывание строки
         str = readLine();
         if(str == NULL)
         {
+            ERRORS("Строка не была создана\n");
             return 1;
         }
         INFO("%s\n", str);
@@ -119,6 +66,7 @@ int main()
         argv = tokenizeString(str);
         if(argv == NULL)
         {
+            ERRORS("Массив токенов не существует\n");
             free(str);
             return 1;
         }
@@ -126,27 +74,16 @@ int main()
         // печать токенов
         printTokens(argv);
 
-        if(strcmp(str, "out") == 0)
+        if(argv[0] && strcmp(argv[0], "out") == 0)
             break;
+
+        if(argv[0] && (strcmp(argv[0], "ls") == 0 || strcmp(argv[0], "firefox") == 0))
+            launch(argv);
 
         free(str); 
         free(argv);
     }
 
-
-    // pid_t pid = fork();
-    
-    // if(pid == 0)
-    // {
-    //     INFOS("imma child\n");
-    //     execlp("ls", "ls", "-la", NULL);
-    //     exit(1);
-    // }
-    // else
-    // {
-    //     INFOS("waiting child\n");
-    //     waitpid(pid, NULL, 0);
-    // }
     if(str) free(str);
     if(argv) free(argv);
     return 0;
