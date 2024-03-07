@@ -34,21 +34,20 @@ size_t findFileNamePos(const char* str);
 
 // печать справочной информации
 void printLog(
-    FILE *out_stream, const char* file,
+    FILE *out_stream, const char* file, const char* func,
     int line, const char* type);
 
 #define STR(str) #str
 #define INFO(format, ...)\
 {\
-    printLog(stdout, __FILE__, __LINE__, STR(INFO));\
+    printLog(stdout, __FILE__, __FUNCTION__, __LINE__, STR(INFO));\
     fprintf(stdout, format, __VA_ARGS__);\
 }
 
 #define ERROR(format, ...) \
 {\
-    printLog(stderr, __FILE__, __LINE__, STR(ERROR));\
+    printLog(stderr, __FILE__, __FUNCTION__, __LINE__, STR(ERROR));\
     fprintf(stderr, format, __VA_ARGS__);\
-    return EXIT_FAILURE;\
 }
 
 #define INFOS(str) INFO("%s", str);
