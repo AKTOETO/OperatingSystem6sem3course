@@ -62,5 +62,7 @@ int killAndDeleteAllBGTask();
 // ждем выполнения foreground задачи
 int waitFGTask();
 
+// завершение всех задач
+int quit();
 
 #endif // !TASKS_H

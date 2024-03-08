@@ -28,13 +28,13 @@ char* readLine()
 }
 
 // токенизация строки
-char** tokenizeString(char *str)
+char** tokenizeString(char *str, size_t *argc)
 {
     // начальный размер массива токенов
     size_t size = DEFAULT_TOKEN_COUNT;
 
     // номер элемента после последнего
-    size_t pos = 0;
+    *argc = 0;
 
     // создаем массив токенов
     char **tokens = (char**)malloc(sizeof(char*) * size);
@@ -46,11 +46,11 @@ char** tokenizeString(char *str)
     do
     {
         // вставляем считанных токен в массив токенов
-        tokens[pos++] = token;
+        tokens[(*argc)++] = token;
 
         // проверяем, есть ли еще место в массиве токенов, 
         // если нет - добавляем
-        if(pos >= size)
+        if(*argc >= size)
         {
             // увеличиваем буфер в2 раза
             size *= 2;
@@ -74,7 +74,9 @@ char** tokenizeString(char *str)
     
     // добавляем в последний токен NULL для определения 
     // количества элементов в массиве токенов
-    tokens[pos] = '\0';    
+    tokens[*argc] = '\0';    
+
+    INFO("Количество токенов: %ld\n", *argc);
 
     return tokens;
 }
@@ -89,10 +91,9 @@ void printTokens(char **argv)
     }
     size_t pos = 0;
     
-    // первый токен
-    //char *token = argv[pos];
     while(argv[pos])
     {
-        INFO("Токены: [%s]\n", argv[pos++]);
+        INFO("Токены: [%s]\n", argv[pos]);
+        pos++;
     }
 }

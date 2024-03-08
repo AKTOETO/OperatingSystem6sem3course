@@ -1,7 +1,13 @@
 #include "tasks.h"
 
 // foreground задача
-task_t g_fg_task;
+task_t g_fg_task = 
+{
+    .m_cmd = NULL,
+    .m_pid_id = -1,
+    .m_status = FINISHED,
+    .m_type = FOREGROUND
+};
 
 // все background задачи
 task_t* g_bg_task = NULL;      // массив
@@ -17,6 +23,8 @@ int addTask(pid_t pid, char **argv)
     if(type == FOREGROUND)
     {
         addForegroundTask(pid, argv);
+
+        // ожидаем выполнения задачи
         waitFGTask();
     }
     else
@@ -136,7 +144,7 @@ int killAllBGTask()
 int killAndDeleteAllBGTask()
 {
     killAllBGTask();
-    free(g_bg_task);
+    //free(g_bg_task);
     g_bg_capacity = 0;
     g_bg_count = 0;
 
@@ -147,7 +155,7 @@ int killAndDeleteAllBGTask()
 int waitFGTask()
 {
     // если задача еще не завершена
-    if(g_fg_task.m_status != FINISHED)
+    if(g_fg_task.m_pid_id != -1 && g_fg_task.m_status != FINISHED)
     {
         // ждем его завершения
         if(waitpid(g_fg_task.m_pid_id, NULL, 0) == -1)
@@ -162,5 +170,13 @@ int waitFGTask()
     {
         INFOS("Задача уже завершена\n");
     }
+    return 0;
+}
+
+int quit()
+{
+    waitFGTask();
+    killAndDeleteAllBGTask();
+
     return 0;
 }

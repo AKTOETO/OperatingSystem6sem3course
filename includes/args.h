@@ -10,7 +10,7 @@
 char* readLine();
 
 // токенизация строки
-char** tokenizeString(char *str);
+char** tokenizeString(char *str, size_t *argc);
 
 // печать токенов
 void printTokens(char **argv);
