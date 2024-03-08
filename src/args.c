@@ -1,4 +1,4 @@
-#include "strings.h"
+#include "args.h"
 
 // чтение строки с консоли
 char* readLine()

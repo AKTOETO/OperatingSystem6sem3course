@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(processbrocker)
+project(shell)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -fsanitize=address -std=c11")
 

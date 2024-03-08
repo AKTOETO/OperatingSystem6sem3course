@@ -1,20 +1,28 @@
-#include "strings.h"
-#define STR_SIZE 256
+#include "args.h"
+#include "utils.h"
+#include "tasks.h"
 
-// печать приветствия
-void printHi()
+int out(char **argv)
 {
-    char buffer[STR_SIZE ];
-    if(getcwd(buffer, STR_SIZE) == NULL)
+    killAndDeleteAllBGTask();
+    return -1;
+}
+
+int cd(char **argv) {
+    if (argv[1] == NULL)
     {
-        ERRORS("Не получилось выяснить рабочую диреткорию\n");
+        ERRORS("Недостаточно аргументов для команды\n");
     }
-    else
-        printf("%s:> ", buffer);
+    else if (chdir(argv[1]) != 0)
+    {
+        ERROR("Невозможно сменить директорию на: %s\n", argv[1]);
+    }
+
+    return 0;
 }
 
 // выполнение процесса
-void launch(char **argv)
+int launch(char **argv)
 {
     pid_t pid;
     pid = fork();
@@ -26,28 +34,60 @@ void launch(char **argv)
     // ребенок
     else if(pid == 0)
     {
-        if(execvp(argv[0], argv) == -1)
+        if(strcmp(argv[0], "cd") == 0)
+        {
+            return cd(argv);
+        }
+        else if(execvp(argv[0], argv) == -1)
         {
             ERROR("Неизвестная команда: [%s]\n", argv[0]);
+            return -1;
         }
+        return -1;
     }
     // родитель
     else
     {
-        // сохраняем pid ребенка
-        // обрабатываем background
-        // и foreground процессы отдельно
-        if(waitpid(pid, NULL, 0) == -1)
-        {
-            ERRORS("Что-то пошло не так с закрытием дочернего процесса o_0\n");
-        }
+        // добавляем задачу
+        addTask(pid, argv);
     }
+    return 0;
 }
 
-int main()
+// обработка команд
+int argvProcessing(char **argv)
+{
+    // char **allCmd = 
+    // {
+    //     "ls",
+    //     "cd",
+    //     "firefox"
+    // };
+
+    // если нет токенов - выходим
+    if(!argv[0]) return 1;
+
+    // задачи, которые должны выполняться в основном процессе
+    if(strcmp(argv[0], "out") == 0)
+    {
+        return out(argv);
+    }
+
+    // пытаемся запустить программы
+    return launch(argv);
+}
+
+int main(int argc, char** args)
 {
     char *str = NULL;
     char **argv = NULL;
+
+    // если есть флаг -i, то выключаем информационные сообщения
+    if(argc > 1 && strcmp(args[1], "-i") == 0)
+    {
+        INFOS("Информационные сообщения выключены\n");
+        g_use_info = 0;
+    }
 
     while(true)
     {
@@ -74,11 +114,11 @@ int main()
         // печать токенов
         printTokens(argv);
 
-        if(argv[0] && strcmp(argv[0], "out") == 0)
+        if(argvProcessing(argv) == -1)
             break;
 
-        if(argv[0] && (strcmp(argv[0], "ls") == 0 || strcmp(argv[0], "firefox") == 0))
-            launch(argv);
+        // ждем выполнения foreground задачи
+        //waitFGTask();
 
         free(str); 
         free(argv);

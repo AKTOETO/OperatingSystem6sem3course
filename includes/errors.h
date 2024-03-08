@@ -1,25 +1,7 @@
 #ifndef ERRORS_H
 #define ERRORS_H
 
-#define _XOPEN_SOURCE 500 // для подключения новых функций стандарта POSIX
-                          // nftw
-#define _GNU_SOURCE
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <stdbool.h>
-
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-
-#include <errno.h>
-#include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <dirent.h>
-#include <ftw.h>        // nftw
+#include "includes.h"
 
 // цвета сообщений
 #define DEFAULT_WHITE    "\033[0m"
@@ -29,24 +11,31 @@
 // нет ошибок
 #define OK EXIT_SUCCESS
 
+// разрешено ли использование INFO
+extern bool g_use_info;
+
 // поиск имени файла
 size_t findFileNamePos(const char* str);
 
 // печать справочной информации
 void printLog(
-    FILE *out_stream, const char* file, const char* func,
+    FILE *out_stream, int pid, 
+    const char* file, const char* func,
     int line, const char* type);
 
 #define STR(str) #str
 #define INFO(format, ...)\
 {\
-    printLog(stdout, __FILE__, __FUNCTION__, __LINE__, STR(INFO));\
-    fprintf(stdout, format, __VA_ARGS__);\
+    if(g_use_info) \
+    {\
+        printLog(stdout, getpid(), __FILE__, __FUNCTION__, __LINE__, STR(INFO));\
+        fprintf(stdout, format, __VA_ARGS__);\
+    }\
 }
 
 #define ERROR(format, ...) \
 {\
-    printLog(stderr, __FILE__, __FUNCTION__, __LINE__, STR(ERROR));\
+    printLog(stderr, getpid(), __FILE__, __FUNCTION__, __LINE__, STR(ERROR));\
     fprintf(stderr, format, __VA_ARGS__);\
 }
 
