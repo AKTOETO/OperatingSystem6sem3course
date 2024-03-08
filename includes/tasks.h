@@ -51,6 +51,9 @@ int addForegroundTask(pid_t pid, char **argv);
 // добавляем background задачу
 int addBackgroundTask(pid_t pid, size_t argc, char **argv);
 
+// убить foreground задачу
+int killFGTask();
+
 // убить background задачу
 int killBGTask(task_t* src, bool(*f)(task_t* src, task_t* tt));
 

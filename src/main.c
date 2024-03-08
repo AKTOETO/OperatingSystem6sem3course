@@ -2,6 +2,7 @@
 
 void killAllBGTaskSignal(int sig)
 {
+    killFGTask();
     killAllBGTask();
 }
 

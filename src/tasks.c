@@ -99,6 +99,22 @@ int addBackgroundTask(pid_t pid, size_t argc, char **argv)
     return 0;
 }
 
+int killFGTask()
+{
+    // НЕ РАСКОММЕНТИРОВАТЬ - ПАДАЕТ ГРАФИЧЕСКИЙ ИНТЕРФЕЙС
+    // if(kill(g_fg_task.m_pid_id, SIGTERM) != 0)
+    // {
+    //     ERROR("Процесс с pid: %d не был корректно завершен\n", g_fg_task.m_pid_id);
+    //     g_fg_task.m_status = FINISHED;
+    // }
+    // else
+    // {
+    //     INFO("Процесс PID:%d завершен\n", g_fg_task.m_pid_id);
+    // }
+    // INFO("Процесс PID:%d завершен\n", g_fg_task.m_pid_id);
+    return 0;
+}
+
 int killBGTask(task_t* src, bool (*f)(task_t*, task_t*))
 {
     // указатель процесса
