@@ -39,15 +39,14 @@ int main(int argc, char** args)
         // печать токенов
         printTokens(argv);
 
+        // запуск процессов
         if(argvProcessing(argv, argnum) == -1)
         {
             INFOS("Произошло прерывание\n");
             break;
         }
 
-        // ждем выполнения foreground задачи
-        //waitFGTask();
-
+        // освобождение памяти
         free(str); 
         free(argv);
     }

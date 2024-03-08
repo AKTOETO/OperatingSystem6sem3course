@@ -5,6 +5,7 @@
 
 #define DEFAULT_TOKEN_COUNT 5
 #define TOKEN_DELIMETERS " \n\0"
+#define NULL_TOKENS 3
 
 // чтение строки с консоли
 char* readLine();

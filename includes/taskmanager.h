@@ -10,11 +10,21 @@
 #include "utils.h"
 #include "tasks.h"
 
+#define TASK_COMPLETE 2
+#define TASK_UNKNOWN 1
+#define TASK_EXIT -1
+
 // выполнение процесса
 int launch(size_t argc, char **argv);
 
 // обработка команд
 int argvProcessing(char **argv, size_t argc);
+
+// задачи, выполняемые в главном процессе
+int mainProcTask(size_t argc, char **argv);
+
+// задачи, выполняемые в дочернем процессе
+int childProcTask(size_t argc, char **argv);
 
 // ЗАДАЧИ
 // выход из оболочки

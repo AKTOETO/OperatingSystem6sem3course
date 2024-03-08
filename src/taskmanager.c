@@ -55,8 +55,23 @@ int argvProcessing(char **argv, size_t argc)
     // };
 
     // если нет токенов - выходим
-    if(!argv[0]) return 1;
+    if(!argv[0]) return NULL_TOKENS;
 
+    // задачи, которые должны выполняться в основном процессе
+    // если не было найдено совпадений, пытаемся запустить
+    // задачу из дочернего потока (мб там будет совпадение)
+    if(mainProcTask(argc, argv) == TASK_UNKNOWN &&
+        launch(argc, argv) == TASK_UNKNOWN)
+    {
+        ERROR("Неизвестная команда: [%s]\n", argv[0]);
+        return TASK_UNKNOWN;
+    }
+
+    return TASK_COMPLETE;
+}
+
+int mainProcTask(size_t argc, char **argv)
+{
     // задачи, которые должны выполняться в основном процессе
     if(strcmp(argv[0], "out") == 0)
     {
@@ -75,14 +90,32 @@ int argvProcessing(char **argv, size_t argc)
         return skoof(argc, argv);
     }
 
-    // пытаемся запустить программы
-    return launch(argc, argv);
+    return TASK_UNKNOWN;
 }
+
+int childProcTask(size_t argc, char **argv)
+{
+    // запуск долгой задачи
+    if(strcmp(argv[0], "watch") == 0)
+    {
+        return watch(argc, argv);
+    }
+    // запуск задачи из переменноф PATH
+    else if(execvp(argv[0], argv) == -1)
+    {
+        return TASK_UNKNOWN;
+    }
+
+    return TASK_UNKNOWN;
+}
+
+
+
 
 int out(size_t argc, char **argv)
 {
     killAndDeleteAllBGTask();
-    return -1;
+    return TASK_EXIT;
 }
 
 int cd(size_t argc, char **argv)
@@ -100,13 +133,13 @@ int cd(size_t argc, char **argv)
         INFOS("Директория сменена\n");
     }
 
-    return 0;
+    return TASK_COMPLETE;
 }
 
 int tka(size_t argc, char **argv)
 {
     quit();
-    return 0;
+    return TASK_COMPLETE;
 }
 
 int watch(size_t argc, char **argv)
@@ -114,7 +147,7 @@ int watch(size_t argc, char **argv)
     fprintf(stdout,"%s\n","Процесс watch начат");
     sleep(10);
     fprintf(stdout,"%s\n","Процесс watch закончен");
-    return 0;
+    return TASK_COMPLETE;
 }
 
 int skoof(size_t argc, char **argv)
@@ -151,5 +184,5 @@ int skoof(size_t argc, char **argv)
 
     for(int i = 0; i < 26; i++)
         fprintf(stdout, "%s\n", prt[i]);
-    return 0;
+    return TASK_COMPLETE;
 }
