@@ -221,7 +221,7 @@ int quit()
 int printBGInfo()
 {
     fprintf(stdout, "Количество background задач: %ld\n", g_bg_count);
-    fprintf(stdout, "Вместивость массива задач: %ld\n", g_bg_capacity);
+    fprintf(stdout, "Вместимость массива задач: %ld\n", g_bg_capacity);
     fprintf(stdout, "Информация по каждой задаче:\n\n");
 
     /*
