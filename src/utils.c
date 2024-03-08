@@ -12,5 +12,5 @@ void printHi()
         ERRORS("Не получилось выяснить рабочую диреткорию\n");
     }
     else    
-        printf("%s@%s:> ", pw->pw_name, buffer);
+        printf("%s%s@%s%s:> ",HI_GREEN_WHITE, pw->pw_name, buffer, DEFAULT_WHITE);
 }

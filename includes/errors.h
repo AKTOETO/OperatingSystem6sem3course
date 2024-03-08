@@ -7,6 +7,7 @@
 #define DEFAULT_WHITE    "\033[0m"
 #define ERROR_BOLD_RED   "\033[1;31m"
 #define INFO_BOLD_YELLOW "\033[1;33m"
+#define HI_GREEN_WHITE   "\033[48;5;52m"
 
 // нет ошибок
 #define OK EXIT_SUCCESS
