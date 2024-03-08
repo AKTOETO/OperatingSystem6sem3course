@@ -89,6 +89,10 @@ int mainProcTask(size_t argc, char **argv)
     {
         return pbg(argc, argv);
     }
+    else if(strcmp(argv[0], "help") == 0)
+    {
+        return help(argc, argv);
+    }
 
     return TASK_UNKNOWN;
 }
@@ -139,6 +143,7 @@ int cd(size_t argc, char **argv)
 int tka(size_t argc, char **argv)
 {
     quit();
+    fprintf(stdout, "%s\n", "Процессы завершены");
     return TASK_COMPLETE;
 }
 
@@ -157,6 +162,28 @@ int watch(size_t argc, char **argv)
 int pbg(size_t argc, char **argv)
 {
     printBGInfo();
+    return TASK_COMPLETE;
+}
+
+int help(size_t argc, char **argv)
+{
+    char* cmds[] = 
+    {
+        "out - выход из оболочки",
+        "cd - смена директории",
+        "tka - завершение всех процессов",
+        "watch - что-то очень долго выполняющееся (для теста аргумента &) ",
+        "pbg - печать информации о background процессах",
+        "help - печать информации о доступных командах",
+        NULL
+    };
+
+    int i = 0;
+    while(cmds[i])
+    {
+        fprintf(stdout, "\t%s\n", cmds[i++]);
+    }
+
     return TASK_COMPLETE;
 }
 

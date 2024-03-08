@@ -1,6 +1,5 @@
 #include "taskmanager.h"
 
-
 void killAllBGTaskSignal(int sig)
 {
     killAllBGTask();

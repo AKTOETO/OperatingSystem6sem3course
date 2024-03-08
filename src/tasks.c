@@ -144,7 +144,7 @@ int killAllBGTask()
             g_bg_task[i].m_status = FINISHED;
         }
     }
-    INFOS("Все Background задачи убиты\n");
+    fprintf(stdout, "%s\n", "Все Background задачи убиты\n");
     return 0;
 }
 
