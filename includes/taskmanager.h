@@ -39,6 +39,9 @@ int tka(size_t argc, char **argv);
 // что-то очень долго выполняющееся
 int watch(size_t argc, char **argv);
 
+// печать информации о background процессах
+int pbg(size_t argc, char **argv);
+
 // skoof
 int skoof(size_t argc, char **argv);
 

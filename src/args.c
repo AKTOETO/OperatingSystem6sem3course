@@ -93,7 +93,7 @@ void printTokens(char **argv)
     
     while(argv[pos])
     {
-        INFO("Токены: [%s]\n", argv[pos]);
+        fprintf(stdout, "Токены: [%s]\n", argv[pos]);
         pos++;
     }
 }

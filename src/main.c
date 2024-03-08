@@ -1,11 +1,19 @@
 #include "taskmanager.h"
 
 
+void killAllBGTaskSignal(int sig)
+{
+    killAllBGTask();
+}
+
 int main(int argc, char** args)
 {
     char *str = NULL;
     char **argv = NULL;
     size_t argnum = 0;
+
+    // установка сигнала уничтожения всех bg задач на ctrl c
+    signal(SIGINT, killAllBGTaskSignal);
 
     // если есть флаг -i, то выключаем информационные сообщения
     if(argc > 1 && strcmp(args[1], "-i") == 0)
@@ -13,7 +21,7 @@ int main(int argc, char** args)
         INFOS("Информационные сообщения выключены\n");
         g_use_info = 0;
     }
-
+    
     while(true)
     {
         printHi();
@@ -37,12 +45,13 @@ int main(int argc, char** args)
         }
 
         // печать токенов
-        printTokens(argv);
+        if(g_use_info)
+            printTokens(argv);
 
         // запуск процессов
         if(argvProcessing(argv, argnum) == -1)
         {
-            INFOS("Произошло прерывание\n");
+            INFOS("Конец работы оболочки\n");
             break;
         }
 

@@ -3,6 +3,7 @@
 
 #include "includes.h"
 #include "errors.h"
+#include "args.h"
 
 // типы процессов
 typedef enum
@@ -39,7 +40,7 @@ extern size_t g_bg_count;      // количество задач
 extern size_t g_bg_capacity;   // вместимость массива
 
 // добавление задачи
-int addTask(pid_t pid, char **argv);
+int addTask(pid_t pid, size_t argc, char **argv);
 
 // проверка на запуск команды в background режиме
 process_type getTaskType(char **argv);
@@ -48,7 +49,7 @@ process_type getTaskType(char **argv);
 int addForegroundTask(pid_t pid, char **argv);
 
 // добавляем background задачу
-int addBackgroundTask(pid_t pid, char **argv);
+int addBackgroundTask(pid_t pid, size_t argc, char **argv);
 
 // убить background задачу
 int killBGTask(task_t* src, bool(*f)(task_t* src, task_t* tt));
@@ -64,5 +65,8 @@ int waitFGTask();
 
 // завершение всех задач
 int quit();
+
+// печать информации о всех background задачах
+int printBGInfo();
 
 #endif // !TASKS_H

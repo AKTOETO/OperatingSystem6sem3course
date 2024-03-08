@@ -14,7 +14,7 @@ task_t* g_bg_task = NULL;      // массив
 size_t g_bg_count = 0;      // количество задач
 size_t g_bg_capacity = 0;   // вместимость массива
 
-int addTask(pid_t pid, char **argv)
+int addTask(pid_t pid, size_t argc, char **argv)
 {
     // получаем тип процесса
     process_type type = getTaskType(argv);
@@ -29,7 +29,7 @@ int addTask(pid_t pid, char **argv)
     }
     else
     {
-        addBackgroundTask(pid, argv);
+        addBackgroundTask(pid, argc, argv);
     }
 
     return 0;
@@ -69,9 +69,9 @@ int addForegroundTask(pid_t pid, char **argv)
     return 0;
 }
 
-int addBackgroundTask(pid_t pid, char **argv)
+int addBackgroundTask(pid_t pid, size_t argc, char **argv)
 {
-    // проверяем, есть ли мест для добавления процесса
+    // проверяем, есть ли место для добавления процесса
     if(g_bg_count >= g_bg_capacity)
     {
         // новый размер 
@@ -83,7 +83,14 @@ int addBackgroundTask(pid_t pid, char **argv)
     }
 
     // добавляем новую задачу
-    g_bg_task[g_bg_count].m_cmd = argv;
+    // дублирование токенов
+    g_bg_task[g_bg_count].m_cmd = malloc(argc * sizeof(char*));
+    for(int i = 0; i < argc - 1; i++)
+        {
+            g_bg_task[g_bg_count].m_cmd[i] = strdup(argv[i]);
+        }
+    g_bg_task[g_bg_count].m_cmd[argc - 1] = '\0';
+
     g_bg_task[g_bg_count].m_pid_id = pid;
     g_bg_task[g_bg_count].m_type = BACKGROUND;
     g_bg_task[g_bg_count++].m_status = RUNNING;
@@ -145,6 +152,16 @@ int killAndDeleteAllBGTask()
 {
     killAllBGTask();
     //free(g_bg_task);
+    for(int i = 0; i < g_bg_count; i++)     
+    {
+        int j = 0;
+        while(g_bg_task[i].m_cmd[j])
+        {
+            free(g_bg_task[i].m_cmd[j++]);
+        }
+        free(g_bg_task[i].m_cmd);
+    }
+
     g_bg_capacity = 0;
     g_bg_count = 0;
 
@@ -177,6 +194,34 @@ int quit()
 {
     waitFGTask();
     killAndDeleteAllBGTask();
+
+    return 0;
+}
+
+int printBGInfo()
+{
+    fprintf(stdout, "Количество background задач: %ld\n", g_bg_count);
+    fprintf(stdout, "Вместивость массива задач: %ld\n", g_bg_capacity);
+    fprintf(stdout, "Информация по каждой задаче:\n\n");
+
+    /*
+    {
+        pid_t m_pid_id;         // номер процесса
+        char** m_cmd;           // команда для его вызова (токенизированная строка)
+        process_type m_type;    // тип процесса
+        process_status m_status;
+    } task_t;
+    */
+
+    for(int i = 0; i < g_bg_count; i++)
+    {
+        fprintf(stdout, "Порядковый номер процесса: %d\n", i);
+        fprintf(stdout, "\t PID: %d\n", g_bg_task[i].m_pid_id);
+        fprintf(stdout, "Name: %p=%s\n",g_bg_task[i].m_cmd, *g_bg_task[i].m_cmd);
+        printTokens(g_bg_task[i].m_cmd);
+        fprintf(stdout, "\t Тип процесса: %d\n", g_bg_task[i].m_type);
+        fprintf(stdout, "\t Статус процесса: %d\n\n", g_bg_task[i].m_status);
+    }
 
     return 0;
 }

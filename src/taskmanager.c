@@ -3,6 +3,7 @@
 // выполнение процесса
 int launch(size_t argc, char **argv)
 {
+    int code = 0;
     pid_t pid;
     pid = fork();
 
@@ -19,55 +20,50 @@ int launch(size_t argc, char **argv)
             INFOS("Символ & удален из команды\n");
             argv[argc - 1] = NULL;
         }
-
-        // запуск долгой задачи
-        if(strcmp(argv[0], "watch") == 0)
-        {
-            watch(argc, argv);
-        }
-        // запуск задачи из переменноф PATH
-        else if(execvp(argv[0], argv) == -1)
-        {
-            ERROR("Неизвестная команда: [%s]\n", argv[0]);
-        }
-
+        
         // после завершения работы дочернего процесса, нужно 
         // завершить процесс (не выйти из функции, а завершить процесс!!)
-        exit(-1);
+        code = childProcTask(argc, argv);
+
+        exit(code);
     }
     // родитель
     else
     {
         // добавляем задачу
-        addTask(pid, argv);
+        addTask(pid, argc, argv);
     }
-    return 0;
+    return code;
 }
 
 // обработка команд
 int argvProcessing(char **argv, size_t argc)
 {
-    // char **allCmd = 
-    // {
-    //     "ls",
-    //     "cd",
-    //     "firefox"
-    // };
-
     // если нет токенов - выходим
     if(!argv[0]) return NULL_TOKENS;
 
-    // задачи, которые должны выполняться в основном процессе
-    // если не было найдено совпадений, пытаемся запустить
-    // задачу из дочернего потока (мб там будет совпадение)
-    if(mainProcTask(argc, argv) == TASK_UNKNOWN &&
-        launch(argc, argv) == TASK_UNKNOWN)
+    // пытаюсь запустить задачу в главном процессе
+    // если не получилось и код ошибки равен TASK_UNKNOWN
+    // то запускаем в дочернем процессе
+    int code = mainProcTask(argc, argv);
+    if(code == TASK_EXIT)
+        return TASK_EXIT;
+
+    if(code == TASK_UNKNOWN)
     {
-        ERROR("Неизвестная команда: [%s]\n", argv[0]);
-        return TASK_UNKNOWN;
+        code = launch(argc, argv);
+        if(code == TASK_UNKNOWN)
+        {
+            // TODO
+            // это никогда не сработает, потому что переменную с кодом возврата меняет дочерний поток
+            // родительский никогда не узнает об этом (вся инфа при форке дублируется)
+            // надо через waitpid получать ошибку, либо просто забить :)
+            ERROR("Неизвестная команда: [%s]\n", argv[0]);
+            return TASK_UNKNOWN;
+        }
     }
 
-    return TASK_COMPLETE;
+    return code;
 }
 
 int mainProcTask(size_t argc, char **argv)
@@ -88,6 +84,10 @@ int mainProcTask(size_t argc, char **argv)
     else if(strcmp(argv[0], "skoof") == 0)
     {
         return skoof(argc, argv);
+    }    // вывод информации обо всех задачах background
+    else if(strcmp(argv[0], "pbg") == 0)
+    {
+        return pbg(argc, argv);
     }
 
     return TASK_UNKNOWN;
@@ -144,9 +144,19 @@ int tka(size_t argc, char **argv)
 
 int watch(size_t argc, char **argv)
 {
-    fprintf(stdout,"%s\n","Процесс watch начат");
-    sleep(10);
-    fprintf(stdout,"%s\n","Процесс watch закончен");
+    fprintf(stdout,"\n%s\n","Процесс watch начат");
+    for(int i = 0; i < 10; i++)
+    {
+        fprintf(stdout, "\nwatch i:%d\n", i);
+        sleep(1);
+    }
+    fprintf(stdout,"\n%s\n","Процесс watch закончен");
+    return TASK_COMPLETE;
+}
+
+int pbg(size_t argc, char **argv)
+{
+    printBGInfo();
     return TASK_COMPLETE;
 }
 
