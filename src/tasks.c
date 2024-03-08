@@ -143,6 +143,10 @@ int killAllBGTask()
             ERROR("Процесс с pid: %d не был корректно завершен\n", g_bg_task[i].m_pid_id);
             g_bg_task[i].m_status = FINISHED;
         }
+        else
+        {
+            INFO("Процесс PID:%d завершен\n", g_bg_task[i].m_pid_id);
+        }
     }
     fprintf(stdout, "%s\n", "Все Background задачи убиты\n");
     return 0;
