@@ -31,7 +31,7 @@ int launch(size_t argc, char **argv)
     else
     {
         // добавляем задачу
-        addTask(pid, argc, argv);
+        code = addTask(pid, argc, argv);
     }
     return code;
 }
@@ -66,6 +66,7 @@ int argvProcessing(char **argv, size_t argc)
     return code;
 }
 
+// task manager
 int mainProcTask(size_t argc, char **argv)
 {
     // задачи, которые должны выполняться в основном процессе
@@ -97,6 +98,7 @@ int mainProcTask(size_t argc, char **argv)
     return TASK_UNKNOWN;
 }
 
+// child process
 int childProcTask(size_t argc, char **argv)
 {
     // запуск долгой задачи
@@ -113,15 +115,14 @@ int childProcTask(size_t argc, char **argv)
     return TASK_UNKNOWN;
 }
 
-
-
-
+// out
 int out(size_t argc, char **argv)
 {
     killAndDeleteAllBGTask();
     return TASK_EXIT;
 }
 
+// change directory
 int cd(size_t argc, char **argv)
 {
     if (argv[1] == NULL)
@@ -140,6 +141,7 @@ int cd(size_t argc, char **argv)
     return TASK_COMPLETE;
 }
 
+// task kill all
 int tka(size_t argc, char **argv)
 {
     quit();
@@ -147,6 +149,7 @@ int tka(size_t argc, char **argv)
     return TASK_COMPLETE;
 }
 
+// long process
 int watch(size_t argc, char **argv)
 {
     fprintf(stdout,"\n%s\n","Процесс watch начат");
@@ -159,12 +162,14 @@ int watch(size_t argc, char **argv)
     return TASK_COMPLETE;
 }
 
+// print background
 int pbg(size_t argc, char **argv)
 {
     printBGInfo();
     return TASK_COMPLETE;
 }
 
+// help
 int help(size_t argc, char **argv)
 {
     char* cmds[] = 
@@ -187,6 +192,7 @@ int help(size_t argc, char **argv)
     return TASK_COMPLETE;
 }
 
+// shrek
 int skoof(size_t argc, char **argv)
 {
     char* prt[26] = 

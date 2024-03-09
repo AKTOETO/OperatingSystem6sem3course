@@ -66,6 +66,9 @@ int killAndDeleteAllBGTask();
 // ждем выполнения foreground задачи
 int waitFGTask();
 
+// ждем выполнения background задачи без блокировки главного процесса
+int waitBGTask(); 
+
 // завершение всех задач
 int quit();
 
