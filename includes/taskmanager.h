@@ -14,38 +14,38 @@
 #define TASK_UNKNOWN 1
 #define TASK_EXIT -1
 
-// выполнение процесса
-int launch(size_t argc, char **argv);
+// // выполнение процесса
+// int launch(size_t argc, char **argv);
 
-// обработка команд
-int argvProcessing(char **argv, size_t argc);
+// // обработка команд
+// int argvProcessing(char **argv, size_t argc);
 
-// задачи, выполняемые в главном процессе
-int mainProcTask(size_t argc, char **argv);
+// // задачи, выполняемые в главном процессе
+// int mainProcTask(size_t argc, char **argv);
 
-// задачи, выполняемые в дочернем процессе
-int childProcTask(size_t argc, char **argv);
+// // задачи, выполняемые в дочернем процессе
+// int childProcTask(size_t argc, char **argv);
 
 // ЗАДАЧИ
-// выход из оболочки
-int out(size_t argc, char **argv);
+// // выход из оболочки
+// int out(size_t argc, char **argv);
 
-// смена директории
-int cd(size_t argc, char **argv);
+// // смена директории
+// int cd(size_t argc, char **argv);
 
-// завершение всех процессов
-int tka(size_t argc, char **argv);
+// // завершение всех процессов
+// int tka(size_t argc, char **argv);
 
-// что-то очень долго выполняющееся
-int watch(size_t argc, char **argv);
+// // что-то очень долго выполняющееся
+// int watch(size_t argc, char **argv);
 
-// печать информации о background процессах
-int pbg(size_t argc, char **argv);
+// // печать информации о background процессах
+// int pbg(size_t argc, char **argv);
 
-// печать информации о доступных командах
-int help(size_t argc, char **argv);
+// // печать информации о доступных командах
+// int help(size_t argc, char **argv);
 
-// skoof
-int skoof(size_t argc, char **argv);
+// // skoof
+// int skoof(size_t argc, char **argv);
 
 #endif

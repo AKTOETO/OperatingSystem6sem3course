@@ -4,15 +4,257 @@
 task_t g_fg_task = 
 {
     .m_cmd = NULL,
+    .m_argc = 0,
     .m_pid_id = -1,
     .m_status = FINISHED,
     .m_type = FOREGROUND
 };
 
 // все background задачи
-task_t* g_bg_task = NULL;      // массив
+task_t* g_bg_task = NULL;   // массив
 size_t g_bg_count = 0;      // количество задач
 size_t g_bg_capacity = 0;   // вместимость массива
+
+// ЗАДАЧИ
+// MAIN
+// выход из оболочки
+int out(size_t argc, char **argv)
+{
+    INFOS("out invoked\n");
+    return -1;
+}
+
+// смена директории
+int cd(size_t argc, char **argv)
+{
+    if (argc <= 1 || argv[1] == NULL)
+    {
+        ERRORS("Недостаточно аргументов для команды\n");
+    }
+    else if (chdir(argv[1]) != 0)
+    {
+        ERROR("Невозможно сменить директорию на: %s\n", argv[1]);
+    }
+    else
+    {
+        INFOS("Директория сменена\n");
+    }
+
+    return 0;
+}
+
+// завершение всех процессов
+int tka(size_t argc, char **argv)
+{
+    INFOS("tka invoked\n");
+    return 0;    
+}
+
+// печать информации о background процессах
+int pbg(size_t argc, char **argv)
+{
+    INFOS("pbg invoked\n");
+    printBGInfo();
+    return 0;
+}
+
+// печать информации о доступных командах
+int help(size_t argc, char **argv)
+{
+    char* cmds[] = 
+    {
+        "out - выход из оболочки",
+        "cd - смена директории",
+        "tka - завершение всех процессов",
+        "watch - что-то очень долго выполняющееся (для теста аргумента &) ",
+        "pbg - печать информации о background процессах",
+        "help - печать информации о доступных командах",
+        NULL
+    };
+
+    int i = 0;
+    while(cmds[i])
+    {
+        fprintf(stdout, "\t%s\n", cmds[i++]);
+    }
+
+    return 0;
+}
+
+// skoof
+int skoof(size_t argc, char **argv)
+{
+    char* prt[26] = 
+    {
+"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⠶⠒⣣⣶⣶⣶⡶⠶⠶⣶⡶⠶⣖⠒⢶⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⢿⠀⠀⠙⠿⣿⠻⠄⠀⠈⠀⠙⢦⠈⢣⣼⣿⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⠃⠀⠀⠀⠀⠀⠀⢁⡊⠀⠀⢀⡀⢠⣦⡻⢧⡀⠹⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣠⣶⣀⣴⣄⣠⣆⣀⣽⣤⣰⣯⣴⣿⣿⣷⣼⣿⣿⣧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⣿⣿⠛⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡆⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⠀⠀",
+"⠀⢠⣶⣦⡀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⣿⣷⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⠀⠀⠀⠀⠀⠀⠀⣰⣿⣿⠱⡄",
+"⢠⡿⠟⣿⢿⡄⠀⣀⣤⡴⠞⠛⠛⠷⠾⡿⢿⡿⠿⠿⠿⣿⣿⣿⣿⣿⠿⣿⣿⣿⣿⡿⣿⣿⡿⣿⣶⣶⣶⣶⣤⣄⡴⢳⣿⣿⠀⢹",
+"⢿⣧⣴⣿⣼⣿⣦⣈⠉⠉⠉⣺⠟⠂⠀⠀⠈⠋⠒⠀⠀⠋⠉⠉⠉⠀⣸⠟⡀⠀⠀⣠⠉⠈⠻⠿⣷⣌⠁⣀⡴⠋⢁⣴⣾⣿⠶⠟",
+"⠈⠛⠛⠛⠻⠷⢤⣈⠛⠶⣶⢇⣤⣤⣤⣤⣤⣀⡔⠒⠒⠒⠀⠀⠀⠚⢻⣾⣿⣾⣿⣿⡻⠓⠒⠚⠛⠛⣿⣿⣷⠞⠉⠀⠀⠀⠀⠀",
+"⠀⠀⠀⠀⠀⠀⠀⠙⢿⡃⠿⣿⣥⡼⢯⡼⢿⣿⣿⠂⠀⠀⠀⠀⠀⣿⢹⣷⠿⣥⡿⢿⣿⣿⠀⠀⠀⣠⣿⡟⠁⠀⠀⠀⠀⠀⠀⠀",
+"⠀⠀⠀⠀⠀⠀⠀⠀⠀⡗⠀⠈⠻⣷⣯⣱⣾⣩⣿⣆⠀⠀⠀⠀⠀⠘⠿⣽⣶⣏⣷⣏⣹⣿⡀⠀⠐⠋⠹⣧⠀⠀⠀⠀⠀⠀⠀⠀",
+"⠀⠀⠀⠀⠀⠀⠀⠀⢰⠁⠀⠀⠀⠈⠉⠛⠛⠋⢉⠁⠀⠀⠀⠀⠀⠀⠀⠘⢿⣿⣯⡉⠉⠉⠀⠀⠀⠀⠀⠸⡆⠀⠀⠀⠀⠀⠀⠀",
+"⠀⠀⠀⠀⠀⠀⠀⠀⡞⠀⠀⠀⠀⠀⠀⠀⢀⣴⠋⢀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣷⣼⣿⣄⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀",
+"⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⢀⣤⣾⠿⠋⠛⠿⠿⠶⢦⣤⣤⣶⣾⣿⣿⣿⣿⣿⣿⠟⠻⢶⣄⠀⠀⠀⣿⡇⠀⠀⠀⠀⠀⠀",
+"⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⢠⡿⠋⠁⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠉⠉⠉⠁⢀⣰⣶⡄⢻⡀⢀⠀⣿⡇⠀⠀⠀⠀⠀⠀",
+"⠀⠀⠀⠀⠀⠀⠀⠀⠃⠀⠀⠠⠏⠀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣠⣤⣶⣿⣿⣿⣷⠸⡇⠈⠹⣿⡇⠀⠀⠀⠀⠀⠀",
+"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠻⣿⡾⠿⣿⠿⣿⡿⠿⣿⣿⡿⢿⡟⢻⣿⣿⣿⡿⣹⣿⣄⣿⠀⢀⣿⡇⠀⠀⠀⠀⠀⠀",
+"⠀⠀⠀⠀⠀⠀⠀⠐⡄⠀⠀⠀⠀⠀⠀⠀⠘⠳⢤⣷⣤⡾⠄⠠⠼⠇⠀⠘⠛⠛⠛⠛⠛⠛⠛⠛⠛⠛⠒⠛⠉⠱⣶⣶⣶⣦⣄⡀",
+"⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠛⠒⠠⠤⣤⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿⡇",
+"⠀⠀⠀⠀⠀⠀⠀⠀⠸⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠙⣿⣷⣶⣶⣦⣤⣤⣤⣀⣀⣀⣀⣼⣿⣿⣿⡿⠁",
+"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⣿⢿⣿⡿⠇⢘⣩⣿⡿⠃⠀⠀⠀⠀⠉⠉⠀⠀",
+"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠳⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠃⠙⠃⠐⣿⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠳⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣶⣷⣾⠟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠳⢤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣾⣿⣿⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠒⠤⣤⣤⣤⣴⣶⣶⣶⣿⣿⡿⠿⠛⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
+"⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀"
+    };
+
+    for(int i = 0; i < 26; i++)
+        fprintf(stdout, "%s\n", prt[i]);
+    return 0;
+}
+
+// FOREGROUND
+
+// BACKGROUND
+// long process
+int watch(size_t argc, char **argv)
+{
+    fprintf(stdout,"\n%s\n","Процесс watch начат");
+    for(int i = 0; i < 10; i++)
+    {
+        fprintf(stdout, "\nwatch i:%d\n", i);
+        sleep(1);
+    }
+    fprintf(stdout,"\n%s\n","Процесс watch закончен");
+    return 0;
+}
+
+// КОНЕЦ ЗАДАЧ
+
+// МАССИВЫ СООТВЕТСТВИЙ КОМАНД
+// MAIN
+// массив возможных main задач (не из PATH)
+char *g_main_task_list[MAIN_LIST_SIZE] = 
+{
+    "out",
+    "cd",
+    "tka",
+    "skoof",
+    "pbg",
+    "help"
+};
+
+// проверка: переданная задача из main task list
+int isItFromMainTaskList(char *task_name)
+{
+    // индекс задачи
+    int i = 0;
+
+    // проходимся по задачам и сравниваем
+    for(; i < MAIN_LIST_SIZE; i++)
+    {
+        // если есть совпадение - возвращаем индекс
+        if(strcmp(g_main_task_list[i], task_name) == 0)
+        {
+            return i;
+        }
+    }
+
+    // иначе возвращаем -1
+    return -1;
+}
+
+// массив указателей на функции, которые могут быть исполнены в main 
+int(*g_main_task_func[MAIN_LIST_SIZE])(size_t, char **) =
+{
+    out,
+    cd,
+    tka,
+    skoof,
+    pbg,
+    help
+};
+
+
+
+// FOREGROUND
+// массив возможных fg задач (не из PATH)
+char *g_fg_task_list[FG_LIST_SIZE] = 
+{
+};
+
+// проверка: переданная задача из main task list
+int isItFromFgTaskList(char *task_name)
+{
+    // индекс задачи
+    int i = 0;
+
+    // проходимся по задачам и сравниваем
+    for(; i < FG_LIST_SIZE; i++)
+    {
+        // если есть совпадение - возвращаем индекс
+        if(strcmp(g_fg_task_list[i], task_name) == 0)
+        {
+            return i;
+        }
+    }
+
+    // иначе возвращаем -1
+    return -1;
+}
+
+// массив указателей на функции, которые могут быть исполнены в main 
+int(*g_fg_task_func[FG_LIST_SIZE])(size_t, char **) =
+{
+};
+
+
+
+// BACKGROUND
+// массив возможных bg задач (не из PATH)
+char *g_bg_task_list[BG_LIST_SIZE] = 
+{
+    "watch"
+};
+
+// проверка: пеерданная задача из bg task list
+int isItFromBgTaskList(char *task_name)
+{
+    // индекс задачи
+    int i = 0;
+
+    // проходимся по задачам и сравниваем
+    for(; i < BG_LIST_SIZE; i++)
+    {
+        // если есть совпадение - возвращаем индекс
+        if(strcmp(g_bg_task_list[i], task_name) == 0)
+        {
+            return i;
+        }
+    }
+
+    // иначе возвращаем -1
+    return -1;
+}
+
+// массив указателей на функции, которые могут быть исполнены в bg 
+int(*g_bg_task_func[BG_LIST_SIZE])(size_t, char **) = 
+{
+    watch
+};
+
+
+// КОНЕЦ МАССИВОВ СООТВЕТСТВИЙ КОМАНД
+
+
+
+
 
 int addTask(pid_t pid, size_t argc, char **argv)
 {
@@ -22,7 +264,7 @@ int addTask(pid_t pid, size_t argc, char **argv)
     // сохраняем его 
     if(type == FOREGROUND)
     {
-        addForegroundTask(pid, argv);
+        addForegroundTask(pid, argc, argv);
 
         // ожидаем выполнения задачи
         waitFGTask();
@@ -30,7 +272,7 @@ int addTask(pid_t pid, size_t argc, char **argv)
     else
     {
         addBackgroundTask(pid, argc, argv);
-        return waitBGTask();
+        //return waitBGTask();
     }
 
     return 0;
@@ -57,9 +299,10 @@ process_type getTaskType(char **argv)
     return FOREGROUND;
 }
 
-int addForegroundTask(pid_t pid, char **argv)
+int addForegroundTask(pid_t pid, size_t argc, char **argv)
 {
     // сохраняем информацию о процессе
+    g_fg_task.m_argc = argc;
     g_fg_task.m_cmd = argv;
     g_fg_task.m_pid_id = pid;
     g_fg_task.m_type = FOREGROUND;
@@ -84,17 +327,16 @@ int addBackgroundTask(pid_t pid, size_t argc, char **argv)
     }
 
     // добавляем новую задачу
+    g_bg_task[g_bg_count].m_argc = argc;
     // дублирование токенов
-    g_bg_task[g_bg_count].m_cmd = malloc(argc * sizeof(char*));
-    for(int i = 0; i < argc - 1; i++)
-        {
-            g_bg_task[g_bg_count].m_cmd[i] = strdup(argv[i]);
-        }
-    g_bg_task[g_bg_count].m_cmd[argc - 1] = '\0';
+    g_bg_task[g_bg_count].m_cmd = dublicateToken(argc, argv);
 
     g_bg_task[g_bg_count].m_pid_id = pid;
     g_bg_task[g_bg_count].m_type = BACKGROUND;
-    g_bg_task[g_bg_count++].m_status = RUNNING;
+    g_bg_task[g_bg_count].m_status = RUNNING;
+
+    // переход к следующему элементу
+    g_bg_count++;
 
     INFO("Добавлена Background задача на место %ld в массиве задaч\n", g_bg_count - 1);
     return 0;
@@ -165,14 +407,13 @@ int killAllBGTask()
         }
         g_bg_task[i].m_status = FINISHED;
     }
-    fprintf(stdout, "%s\n", "Все Background задачи убиты\n");
+    INFO("%s\n", "Все Background задачи убиты");
     return 0;
 }
 
 int killAndDeleteAllBGTask()
 {
     killAllBGTask();
-    //free(g_bg_task);
     for(int i = 0; i < g_bg_count; i++)     
     {
         int j = 0;
@@ -241,6 +482,7 @@ int waitBGTask()
 
 int quit()
 {
+    INFOS("Выполняется завершение работы\n");
     waitFGTask();
     killAndDeleteAllBGTask();
 
@@ -266,6 +508,7 @@ int printBGInfo()
     {
         fprintf(stdout, "Порядковый номер процесса: %d\n", i);
         fprintf(stdout, "\t PID: %d\n", g_bg_task[i].m_pid_id);
+        fprintf(stdout, "\t argc: %ld\n", g_bg_task[i].m_argc);
         fprintf(stdout, "Name: %p=%s\n",g_bg_task[i].m_cmd, *g_bg_task[i].m_cmd);
         printTokens(g_bg_task[i].m_cmd);
         fprintf(stdout, "\t Тип процесса: %d\n", g_bg_task[i].m_type);

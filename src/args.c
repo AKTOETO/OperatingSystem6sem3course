@@ -12,7 +12,7 @@ char* readLine()
     // размер 
     ssize_t size = 0;
 
-    // проверка у далось ли считать строку
+    // проверка: удалось ли считать строку
     if((size = getline(&str, &len, stdin)) == -1)
     {
         free(str);
@@ -74,7 +74,7 @@ char** tokenizeString(char *str, size_t *argc)
     
     // добавляем в последний токен NULL для определения 
     // количества элементов в массиве токенов
-    tokens[*argc] = '\0';    
+    tokens[*argc] = NULL;    
 
     INFO("Количество токенов: %ld\n", *argc);
 
@@ -89,11 +89,50 @@ void printTokens(char **argv)
         ERRORS("Массив токенов не существует\n");
         return;
     }
+    fprintf(stdout, "Массив токенов\n");
     size_t pos = 0;
     
     while(argv[pos])
     {
-        fprintf(stdout, "Токены: [%s]\n", argv[pos]);
+        fprintf(stdout, "Токены: %p = [%s]\n", argv + pos, argv[pos]);
         pos++;
     }
+}
+
+char **dublicateToken(size_t argc, char **argv)
+{
+    // проверка на отсутствие количества токенов
+    if(argc <= 0 || argv == NULL)
+        ERRORS("Нет токенов для копирования\n");
+
+    // выделение памяти под новый массив токенов
+    char **tokens = malloc(sizeof(char*) * (argc + 1));
+
+    // проходимся по всему массиву переданных токенов
+    for(size_t i = 0; i < argc; i++)
+    {
+        // копируем каждый токен
+        tokens[i] = strdup(argv[i]);
+    }
+
+    // вставляем NULL в последий элемент
+    tokens[argc] = NULL;
+
+    // возврат токенов 
+    return tokens;
+}
+
+void deleteDubTokens(size_t argc, char **argv)
+{
+    INFOS("Удаление токенов\n");
+    // проходимся в цикле по каждой строке 
+    for(size_t i = 0; i < argc; i++)
+    {
+        INFO("Удаление: [%s]\n", argv[i]);
+        // удаляем строку
+        free(argv[i]);
+    }
+
+    // удаляем массив
+    free(argv);
 }

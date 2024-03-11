@@ -16,4 +16,10 @@ char** tokenizeString(char *str, size_t *argc);
 // печать токенов
 void printTokens(char **argv);
 
+// дублирование токенов
+char** dublicateToken(size_t argc, char **argv);
+
+// удаление дублированных токенов
+void deleteDubTokens(size_t argc, char **argv);
+
 #endif // !STRINGS_H
