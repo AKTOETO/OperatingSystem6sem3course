@@ -1,4 +1,5 @@
-#include "taskmanager.h"
+#include "utils.h"
+#include "tasks.h"
 
 void killAllBGTaskSignal(int sig)
 {
@@ -48,10 +49,10 @@ int main(int argc, char** args)
 
         // считывание строки
         str = readLine();
-        if(str == NULL)
+        if(strlen(str) == 0)
         {
             ERRORS("Строка не была создана\n");
-            return 1;
+            continue;
         }
         INFO("%s\n", str);
 
