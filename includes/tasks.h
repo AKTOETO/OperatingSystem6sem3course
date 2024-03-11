@@ -62,6 +62,9 @@ int help(size_t argc, char **argv);
 // skoof
 int skoof(size_t argc, char **argv);
 
+// завершить процесс по пид
+int pidkill(size_t argc, char **argv);
+
 // FOREGROUND
 
 // BACKGROUND
@@ -74,7 +77,7 @@ int watch(size_t argc, char **argv);
 
 // МАССИВЫ СООТВЕТСТВИЙ КОМАНД
 // MAIN
-#define MAIN_LIST_SIZE 6
+#define MAIN_LIST_SIZE 7
 
 // массив возможных bg задач (не из PATH)
 extern char *g_main_task_list[MAIN_LIST_SIZE];
@@ -114,14 +117,8 @@ int isItFromBgTaskList(char *task_name);
 // массив указателей на функции, которые могут быть исполнены в bg 
 extern int(*g_bg_task_func[BG_LIST_SIZE])(size_t, char **);
 
-
 // КОНЕЦ МАССИВОВ СООТВЕТСТВИЙ КОМАНД
 
-// добавление задачи
-int addTask(pid_t pid, size_t argc, char **argv);
-
-// проверка на запуск команды в background режиме
-process_type getTaskType(char **argv);
 
 // добавляем foreground задачу
 int addForegroundTask(pid_t pid, size_t argc, char **argv);

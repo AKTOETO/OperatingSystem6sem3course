@@ -32,7 +32,7 @@ int main(int argc, char** args)
     size_t argnum = 0;
 
     // // установка сигнала уничтожения всех bg задач на ctrl c
-    // signal(SIGINT, killAllBGTaskSignal);
+    signal(SIGINT, killAllBGTaskSignal);
 
     // // если есть флаг -i, то выключаем информационные сообщения
     // if(argc > 1 && strcmp(args[1], "-i") == 0)

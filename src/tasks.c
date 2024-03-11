@@ -20,7 +20,6 @@ size_t g_bg_capacity = 0;   // вместимость массива
 // выход из оболочки
 int out(size_t argc, char **argv)
 {
-    INFOS("out invoked\n");
     return -1;
 }
 
@@ -53,7 +52,6 @@ int tka(size_t argc, char **argv)
 // печать информации о background процессах
 int pbg(size_t argc, char **argv)
 {
-    INFOS("pbg invoked\n");
     printBGInfo();
     return 0;
 }
@@ -119,6 +117,32 @@ int skoof(size_t argc, char **argv)
     return 0;
 }
 
+// доп функция для убийства процесса по pid
+bool pidEqual(task_t *f, task_t *s)
+{
+    return f->m_pid_id == s->m_pid_id;
+}
+
+// убийство процесса по pid
+int pidkill(size_t argc, char **argv)
+{
+    // если аргументов меньше 2, выходим
+    if(argc < 2)
+    {
+        ERRORS("Недостаточно аргументов\n");
+        return 0;
+    }
+
+    // создаем задачу с нужным pid
+    task_t t;
+    t.m_pid_id = atoi(argv[1]);
+
+    // запускаем удаление процесса по условию
+    killBGTask(&t,pidEqual);
+
+    return 0;
+}
+
 // FOREGROUND
 
 // BACKGROUND
@@ -147,7 +171,8 @@ char *g_main_task_list[MAIN_LIST_SIZE] =
     "tka",
     "skoof",
     "pbg",
-    "help"
+    "help",
+    "pidkill"
 };
 
 // проверка: переданная задача из main task list
@@ -178,7 +203,8 @@ int(*g_main_task_func[MAIN_LIST_SIZE])(size_t, char **) =
     tka,
     skoof,
     pbg,
-    help
+    help,
+    pidkill
 };
 
 
@@ -255,50 +281,6 @@ int(*g_bg_task_func[BG_LIST_SIZE])(size_t, char **) =
 
 
 
-
-int addTask(pid_t pid, size_t argc, char **argv)
-{
-    // получаем тип процесса
-    process_type type = getTaskType(argv);
-
-    // сохраняем его 
-    if(type == FOREGROUND)
-    {
-        addForegroundTask(pid, argc, argv);
-
-        // ожидаем выполнения задачи
-        waitFGTask();
-    }
-    else
-    {
-        addBackgroundTask(pid, argc, argv);
-        //return waitBGTask();
-    }
-
-    return 0;
-}
-
-process_type getTaskType(char **argv)
-{
-    // индекс последнего аргумента
-    size_t last_arg = 0;
-    while(argv[last_arg] != NULL)
-    {
-        last_arg++;
-    }
-
-    // если есть символ &, тогда это background задача
-    if(strcmp(argv[--last_arg], "&") == 0)
-    {
-        // удаляем символ &
-        argv[last_arg] = NULL;
-        INFO("Тип процесса: %s\n", "BACKGROUND");
-        return BACKGROUND;
-    }
-    INFO("Тип процесса: %s\n", "FOREGROUND");
-    return FOREGROUND;
-}
-
 int addForegroundTask(pid_t pid, size_t argc, char **argv)
 {
     // сохраняем информацию о процессе
@@ -366,21 +348,22 @@ int killBGTask(task_t* src, bool (*f)(task_t*, task_t*))
     // проходимся по всем задачам и ищем подходящую
     for(; i < g_bg_count; i++)
     {
+        INFO("Сравниваем %d с %d\n", src->m_pid_id, g_bg_task[i].m_pid_id);
         // если переданная функция верна
         // (то есть такой процесс есть в списке дочерних процессов)
         // удаляем процесс
-        if(f(src, &g_bg_task[i]))
+        if(f(src, g_bg_task + i))
         {
             if(kill(g_bg_task[i].m_pid_id, SIGTERM) != 0)
             {
                 ERROR("Процесс с pid: %d не был корректно завершен\n", g_bg_task[i].m_pid_id);
-                return 0;
             }
             else
             {
                 INFO("Задача с pid: %d завершена успешно\n", g_bg_task[i].m_pid_id);
             }
             g_bg_task[i].m_status = FINISHED;
+            return 0;
         }
     }
 
