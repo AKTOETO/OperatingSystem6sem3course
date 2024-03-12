@@ -108,7 +108,7 @@ bool pidEqual(task_t *f, task_t *s)
 }
 
 // убийство процесса по pid
-int pidkill(size_t argc, char **argv)
+int exitt(size_t argc, char **argv)
 {
     // если аргументов меньше 2, выходим
     if(argc < 2)
@@ -117,15 +117,51 @@ int pidkill(size_t argc, char **argv)
         return 0;
     }
 
-    // // создаем задачу с нужным pid
-    // task_t t;
-    // t.m_pid_id = atoi(argv[1]);
+    // создаем задачу с нужным pid
+    task_t t;
+    t.m_pid_id = atoi(argv[1]);
 
-    // // запускаем удаление процесса по условию
-    // killBGTask(&t,pidEqual);
+    // запускаем удаление процесса по условию
+    killBGTask(&t,pidEqual);
 
     return 0;
 }
+
+int killBGTask(task_t* src, bool (*f)(task_t*, task_t*))
+{
+    // указатель процесса
+    size_t i = 0;
+
+    // проходимся по всем задачам и ищем подходящую
+    for(; i < g_bg_count; i++)
+    {
+        INFO("Сравниваем %d с %d\n", src->m_pid_id, g_bg_task[i].m_pid_id);
+        // если переданная функция верна
+        // (то есть такой процесс есть в списке дочерних процессов)
+        // удаляем процесс
+        if(f(src, g_bg_task + i))
+        {
+            if(kill(g_bg_task[i].m_pid_id, SIGTERM) != 0)
+            {
+                ERROR("Процесс с pid: %d не был корректно завершен\n", g_bg_task[i].m_pid_id);
+            }
+            else
+            {
+                INFO("Задача с pid: %d завершена успешно\n", g_bg_task[i].m_pid_id);
+            }
+            g_bg_task[i].m_status = FINISHED;
+            return 0;
+        }
+    }
+
+    // если процесс не был найден
+    if(i == g_bg_count)
+    {
+        ERRORS("Не был найден такой дочерний процесс \n");
+    }
+    return 0;
+}
+
 
 // MAIN
 // массив возможных main задач (не из PATH)
@@ -137,7 +173,7 @@ char *g_main_task_list[MAIN_LIST_SIZE] =
     "skoof",
     "pbg",
     "help",
-    "pidkill"
+    "exit"
 };
 
 // проверка: переданная задача из main task list
@@ -169,5 +205,5 @@ int(*g_main_task_func[MAIN_LIST_SIZE])(size_t, char **) =
     skoof,
     pbg,
     help,
-    pidkill
+    exitt
 };

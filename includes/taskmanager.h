@@ -4,8 +4,6 @@
 
 // подключение задач
 #include "maintask.h"
-#include "bgtask.h"
-#include "fgtask.h"
 
 // создание процесса
 int createTask(size_t argc, char **argv, 
@@ -43,9 +41,6 @@ int addBackgroundTask(pid_t pid, size_t argc, char **argv);
 
 // убить foreground задачу
 int killFGTask();
-
-// убить background задачу
-int killBGTask(task_t* src, bool(*f)(task_t* src, task_t* tt));
 
 // убить все background задачи
 int killAllBGTask();
