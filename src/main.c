@@ -1,29 +1,10 @@
 #include "utils.h"
-#include "tasks.h"
+#include "taskmanager.h"
 
 void killAllBGTaskSignal(int sig)
 {
     killFGTask();
     killAllBGTask();
-}
-
-// является тип задачи bg
-bool isItBackground(size_t* argc, char **argv)
-{
-    // проверяем на наличие токенов
-    if(argc <= 0 || argv == NULL)
-        ERRORS("Недостаточно токенов");
-
-    // берем последний токен
-    // если он &, удаляем его (NULL а его место), возвращаем true
-    if(argv[(*argc) - 1][0] == '&')
-    {
-        argv[--(*argc)] = NULL;
-        return true;
-    }
-
-    // иначе возвращаем false
-    return false;
 }
 
 int main(int argc, char** args)
