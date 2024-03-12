@@ -1,12 +1,10 @@
 #include "taskmanager.h"
 
-
-int createForegroundTask(size_t argc, char **argv)
+int createTask(size_t argc, char **argv,
+               int (*parent)(pid_t, size_t argc, char **argv),
+               int (*child)(size_t argc, char **argv))
 {
-    INFOS("Добавление fg задачи\n");
-
-    // индекс задачи из подготовленного списка возможных задач
-    int ind = 0;
+    INFOS("Создание задачи\n");   
 
     // добавление fg процесса
 
@@ -22,32 +20,8 @@ int createForegroundTask(size_t argc, char **argv)
     // 2) сейчас выполняется дочерний процесс
     if(pid == 0)
     {
-        // можно вынести в указательна функцию и передават ее при вызове
-        // это нужно для создания одной функции для вызова создания bg и fg процессов
-        {
-            // попытка запустить нужную программу
-            // проверка: задача для bg из массива или нет
-            if((ind = isItFromFgTaskList(argv[0])) != -1)
-            {   
-                INFO("Запускаем задачу g_fg_task_func[%d]\n", ind);
-
-                // запускаем соответствующую функцию
-                g_fg_task_func[ind](argc, argv);
-            }
-
-            // если задача не из массива - запускаем execvp
-            // проверяем, запустился ли код 
-            else if(execvp(argv[0], argv) == -1)
-            {
-                // код не был запущен
-                ERRORS("Execvp не смогла запустить код\n");
-            }
-            // если же код не -1, тогда процесс успешно запущен
-            else
-            {
-                INFO("Процесс [%s] успешно запущен\n", argv[0]);
-            }
-        }
+        // вызов обработки создание дочернего процесса
+        child(argc, argv);
             
         // выход из дочернего процесса
         exit(0);
@@ -55,76 +29,103 @@ int createForegroundTask(size_t argc, char **argv)
     // 3) сейчас выполняется родительский процесс
     else
     {
-        // сохранение fg процесса в массив
-        addForegroundTask(pid, argc, argv);
-
-        // ожидание завершения fg процесса
-        waitFGTask();
+        // вызов обработки нового процесса в родительском объекте
+        parent(pid, argc, argv);
     }
             
     return 0;
 }
 
-int createBackgroundTask(size_t argc, char **argv)
+int fgProcChild(size_t argc, char **argv)
 {
-    INFOS("Добавление bg задачи\n");
     // индекс задачи из подготовленного списка возможных задач
     int ind = 0;
-    
-    // добавление bg процесса
 
-    // получаю pid нового процесса
-    pid_t pid = fork();
+    // попытка запустить нужную программу
+    // проверка: задача для bg из массива или нет
+    if((ind = isItFromFgTaskList(argv[0])) != -1)
+    {   
+        INFO("Запускаем задачу g_fg_task_func[%d]\n", ind);
 
-    // проверяю три возможные ситуации
-    // 1) поток не был создан
-    if(pid < 0)
-    {
-        ERRORS("Поток не был создан\n");
+        // запускаем соответствующую функцию
+        g_fg_task_func[ind](argc, argv);
     }
-    // 2) сейчас выполняется дочерний процесс
-    if(pid == 0)
+
+    // если задача не из массива - запускаем execvp
+    // проверяем, запустился ли код 
+    else if(execvp(argv[0], argv) == -1)
     {
-        // можно вынести в указательна функцию и передават ее при вызове
-        // это нужно для создания одной функции для вызова создания bg и fg процессов
-        {
-            // попытка запустить нужную программу
-            // проверка: задача для bg из массива или нет
-            if((ind = isItFromBgTaskList(argv[0])) != -1)
-            {   
-                INFO("Запускаем задачу g_bg_task_func[%d]\n", ind);
-
-                // запускаем соответствующую функцию
-                g_bg_task_func[ind](argc, argv);
-            }
-
-            // если задача не из массива - запускаем execvp
-            // проверяем, запустился ли код 
-            else if(execvp(argv[0], argv) == -1)
-            {
-                // код не был запущен
-                ERRORS("Execvp не смогла запустить код\n");
-            }
-            // если же код не -1, тогда процесс успешно запущен
-            else
-            {
-                INFO("Процесс [%s] успешно запущен\n", argv[0]);
-            }
-
-        }
-            
-        // выход из дочернего процесса
-        exit(0);
+        // код не был запущен
+        ERRORS("Execvp не смогла запустить код\n");
     }
-    // 3) сейчас выполняется родительский процесс
+    // если же код не -1, тогда процесс успешно запущен
     else
     {
-        printTokens(argv);
+        INFO("Процесс [%s] успешно запущен\n", argv[0]);
+    }
+    return 0;
+}
 
-        // сохранение bg процесса в массив
-        addBackgroundTask(pid, argc, argv);
+int fgProcParent(pid_t pid, size_t argc, char **argv)
+{
+    // сохранение fg процесса в массив
+    addForegroundTask(pid, argc, argv);
+
+    // ожидание завершения fg процесса
+    waitFGTask();
+    return 0;
+}
+
+int bgProcChild(size_t argc, char **argv)
+{
+    // индекс задачи из подготовленного списка возможных задач
+    int ind = 0;
+
+    // попытка запустить нужную программу
+    // проверка: задача для bg из массива или нет
+    if((ind = isItFromBgTaskList(argv[0])) != -1)
+    {   
+        INFO("Запускаем задачу g_bg_task_func[%d]\n", ind);
+
+        // запускаем соответствующую функцию
+        g_bg_task_func[ind](argc, argv);
     }
 
+    // если задача не из массива - запускаем execvp
+    // проверяем, запустился ли код 
+    else if(execvp(argv[0], argv) == -1)
+    {
+        // код не был запущен
+        ERRORS("Execvp не смогла запустить код\n");
+    }
+    // если же код не -1, тогда процесс успешно запущен
+    else
+    {
+        INFO("Процесс [%s] успешно запущен\n", argv[0]);
+    }
+    return 0;
+}
+
+int bgProcParent(pid_t pid, size_t argc, char **argv)
+{
+    printTokens(argv);
+
+    // сохранение bg процесса в массив
+    addBackgroundTask(pid, argc, argv);
+    return 0;
+}
+
+int createForegroundTask(size_t argc, char **argv)
+{
+    INFOS("Создание fg задачи\n");
+    createTask(argc, argv, fgProcParent, fgProcChild); 
+    return 0;
+}
+
+int createBackgroundTask(size_t argc, char **argv)
+{
+    INFOS("Создание bg задачи\n");
+    createTask(argc, argv, bgProcParent, bgProcChild);
     return 0;
 }
 

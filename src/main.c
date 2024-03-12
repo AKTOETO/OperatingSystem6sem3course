@@ -61,7 +61,7 @@ int main(int argc, char** args)
             createBackgroundTask(argnum, argv);
         }
 
-        // если нет & проверяем команду на вхождение в список команд, 
+        // если нет &, проверяем команду на вхождение в список команд, 
         // исполняемых в main процессе, если есть совпадение - выполняем в мейне
         else if((ind = isItFromMainTaskList(argv[0])) != -1)
         {

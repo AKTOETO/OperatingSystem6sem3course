@@ -7,6 +7,26 @@
 #include "bgtask.h"
 #include "fgtask.h"
 
+// создание процесса
+int createTask(size_t argc, char **argv, 
+               int(*parent)(pid_t, size_t argc, char **argv),
+               int(*child)(size_t argc, char **argv));
+
+// FOREGROUND
+// обработка ребенка
+int fgProcChild(size_t argc, char **argv);
+
+// обработка родителя
+int fgProcParent(pid_t pid,  size_t argc, char **argv);
+
+// BACKGROUND
+// обработка ребенка
+int bgProcChild(size_t argc, char **argv);
+
+// обработка родителя
+int bgProcParent(pid_t pid,  size_t argc, char **argv);
+
+///////////////////////////
 
 // создание fg процесса
 int createForegroundTask(size_t argc, char **argv);
