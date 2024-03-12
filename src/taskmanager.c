@@ -108,8 +108,6 @@ int bgProcChild(size_t argc, char **argv)
 
 int bgProcParent(pid_t pid, size_t argc, char **argv)
 {
-    printTokens(argv);
-
     // сохранение bg процесса в массив
     addBackgroundTask(pid, argc, argv);
     return 0;
@@ -185,28 +183,12 @@ int addBackgroundTask(pid_t pid, size_t argc, char **argv)
     return 0;
 }
 
-int killFGTask()
-{
-    // НЕ РАСКОММЕНТИРОВАТЬ - ПАДАЕТ ГРАФИЧЕСКИЙ ИНТЕРФЕЙС
-    // if(kill(g_fg_task.m_pid_id, SIGTERM) != 0)
-    // {
-    //     ERROR("Процесс с pid: %d не был корректно завершен\n", g_fg_task.m_pid_id);
-    //     g_fg_task.m_status = FINISHED;
-    // }
-    // else
-    // {
-    //     INFO("Процесс PID:%d завершен\n", g_fg_task.m_pid_id);
-    // }
-    // INFO("Процесс PID:%d завершен\n", g_fg_task.m_pid_id);
-    return 0;
-}
-
 int killAllBGTask()
 {
     // проходимся по всем дочерним задачам и завершаем их
     for(size_t i = 0; i < g_bg_count; i++)
     {
-        if(kill(g_bg_task[i].m_pid_id, SIGKILL) != 0)
+        if(g_bg_task[i].m_status == RUNNING && kill(g_bg_task[i].m_pid_id, SIGTERM) != 0)
         {
             ERROR("Процесс с pid: %d не был корректно завершен\n", g_bg_task[i].m_pid_id);
         }
@@ -253,34 +235,6 @@ int waitFGTask()
         g_fg_task.m_status = FINISHED;
 
         INFOS("Foreground процесс завершен\n");
-    }
-    else
-    {
-        INFOS("Задача уже завершена\n");
-    }
-    return 0;
-}
-
-int waitBGTask()
-{
-    // если задача еще не завершена
-    if(g_bg_task[g_bg_count - 1].m_pid_id != -1 && g_bg_task[g_bg_count - 1].m_status != FINISHED)
-    {
-        // статус завершения задачи
-        int status = 0;
-
-        // ждем его завершения
-        if(waitpid(g_bg_task[g_bg_count - 1].m_pid_id, &status, WNOHANG) == -1)
-        {
-            ERROR("Что-то пошло не так с закрытием дочернего процесса pid: %d\n", g_fg_task.m_pid_id);
-        }
-        g_fg_task.m_status = FINISHED;
-
-        INFOS("Background процесс завершен\n");
-        status = WEXITSTATUS(status);
-        INFO("Статус завершения процесса: %d\n", status);
-        // получение статуса завершения программы
-        return status;
     }
     else
     {

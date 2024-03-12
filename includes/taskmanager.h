@@ -39,9 +39,6 @@ int addForegroundTask(pid_t pid, size_t argc, char **argv);
 // добавляем background задачу
 int addBackgroundTask(pid_t pid, size_t argc, char **argv);
 
-// убить foreground задачу
-int killFGTask();
-
 // убить все background задачи
 int killAllBGTask();
 
@@ -50,9 +47,6 @@ int killAndDeleteAllBGTask();
 
 // ждем выполнения foreground задачи
 int waitFGTask();
-
-// ждем выполнения background задачи без блокировки главного процесса
-int waitBGTask(); 
 
 // завершение всех задач
 int quit();
