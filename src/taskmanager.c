@@ -56,7 +56,7 @@ int fgProcChild(size_t argc, char **argv)
     else if(execvp(argv[0], argv) == -1)
     {
         // код не был запущен
-        ERRORS("Execvp не смогла запустить код\n");
+        ERROR("Execvp не смогла запустить: [%s]\n", argv[0]);
     }
     // если же код не -1, тогда процесс успешно запущен
     else
@@ -96,7 +96,7 @@ int bgProcChild(size_t argc, char **argv)
     else if(execvp(argv[0], argv) == -1)
     {
         // код не был запущен
-        ERRORS("Execvp не смогла запустить код\n");
+        ERROR("Execvp не смогла запустить: [%s]\n", argv[0]);
     }
     // если же код не -1, тогда процесс успешно запущен
     else
@@ -329,7 +329,7 @@ int quit()
     INFOS("Выполняется завершение работы\n");
     waitFGTask();
     killAndDeleteAllBGTask();
-
+    exit(0);
     return 0;
 }
 

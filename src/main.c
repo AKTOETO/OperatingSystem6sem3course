@@ -84,8 +84,8 @@ int main(int argc, char** args)
         free(str); 
         free(argv);
     }
-    quit();
     if(str) free(str);
     if(argv) free(argv);
+    quit();
     return 0;
 }
