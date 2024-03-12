@@ -119,6 +119,12 @@ extern int(*g_bg_task_func[BG_LIST_SIZE])(size_t, char **);
 
 // КОНЕЦ МАССИВОВ СООТВЕТСТВИЙ КОМАНД
 
+// создание fg процесса
+int createForegroundTask(size_t argc, char **argv);
+
+// создание bg процесса
+int createBackgroundTask(size_t argc, char **argv);
+
 
 // добавляем foreground задачу
 int addForegroundTask(pid_t pid, size_t argc, char **argv);
