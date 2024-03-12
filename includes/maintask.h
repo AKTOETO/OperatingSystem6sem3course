@@ -32,7 +32,7 @@ int killBGTask(task_t* src, bool(*f)(task_t* src, task_t* tt));
 
 // МАССИВЫ СООТВЕТСТВИЙ КОМАНД
 // MAIN
-#define MAIN_LIST_SIZE 7
+#define MAIN_LIST_SIZE 6
 
 // массив возможных bg задач (не из PATH)
 extern char *g_main_task_list[MAIN_LIST_SIZE];

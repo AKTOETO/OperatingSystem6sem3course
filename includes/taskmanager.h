@@ -54,5 +54,8 @@ int quit();
 // печать информации о всех background задачах
 int printBGInfo();
 
+// очистка памяти
+int clearMem();
+
 
 #endif // !TASKMANAGER_H

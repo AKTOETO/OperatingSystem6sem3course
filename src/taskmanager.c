@@ -142,9 +142,13 @@ int(*g_bg_task_func[BG_LIST_SIZE])(size_t, char **) =
 
 int addForegroundTask(pid_t pid, size_t argc, char **argv)
 {
+    // удаление аргументов
+    if(g_fg_task.m_cmd)
+        deleteDubTokens(g_fg_task.m_argc, g_fg_task.m_cmd);
+
     // сохраняем информацию о процессе
     g_fg_task.m_argc = argc;
-    g_fg_task.m_cmd = argv;
+    g_fg_task.m_cmd = dublicateToken(argc, argv);
     g_fg_task.m_pid_id = pid;
     g_fg_task.m_type = FOREGROUND;
     g_fg_task.m_status = RUNNING;
@@ -179,7 +183,7 @@ int addBackgroundTask(pid_t pid, size_t argc, char **argv)
     // переход к следующему элементу
     g_bg_count++;
 
-    INFO("Добавлена Background задача на место %ld в массиве задaч\n", g_bg_count - 1);
+    INFO("Добавлена Background задача PID: %d на место %ld в массиве задaч\n", pid,  g_bg_count - 1);
     return 0;
 }
 
@@ -198,7 +202,7 @@ int killAllBGTask()
         }
         g_bg_task[i].m_status = FINISHED;
     }
-    INFO("%s\n", "Все Background задачи убиты");
+    //INFO("%s\n", "Все Background задачи убиты");
     return 0;
 }
 
@@ -248,6 +252,7 @@ int quit()
     INFOS("Выполняется завершение работы\n");
     waitFGTask();
     killAndDeleteAllBGTask();
+    clearMem();
     exit(0);
     return 0;
 }
@@ -278,5 +283,22 @@ int printBGInfo()
         fprintf(stdout, "\t Статус процесса: %d\n\n", g_bg_task[i].m_status);
     }
 
+    return 0;
+}
+
+int clearMem()
+{
+    // удаление аргументов у fg задачи
+    if(g_fg_task.m_cmd)
+        deleteDubTokens(g_fg_task.m_argc, g_fg_task.m_cmd);
+
+    // удаление аргументов у bg задачи
+    for(int i = 0; i < g_bg_count; i++)
+    {
+        deleteDubTokens(g_bg_task[i].m_argc, g_bg_task[i].m_cmd);
+    }
+
+    // удаление массива bg
+    free(g_bg_task);
     return 0;
 }

@@ -37,6 +37,30 @@ int tka(size_t argc, char **argv)
 // печать информации о background процессах
 int pbg(size_t argc, char **argv)
 {
+    fprintf(stdout, "Количество background задач: %ld\n", g_bg_count);
+    fprintf(stdout, "Вместимость массива задач: %ld\n", g_bg_capacity);
+    fprintf(stdout, "Информация по каждой задаче:\n\n");
+
+    /*
+    {
+        pid_t m_pid_id;         // номер процесса
+        char** m_cmd;           // команда для его вызова (токенизированная строка)
+        process_type m_type;    // тип процесса
+        process_status m_status;
+    } task_t;
+    */
+
+    for(int i = 0; i < g_bg_count; i++)
+    {
+        fprintf(stdout, "Порядковый номер процесса: %d\n", i);
+        fprintf(stdout, "\t PID: %d\n", g_bg_task[i].m_pid_id);
+        fprintf(stdout, "\t argc: %ld\n", g_bg_task[i].m_argc);
+        fprintf(stdout, "Name: %p=%s\n",g_bg_task[i].m_cmd, *g_bg_task[i].m_cmd);
+        printTokens(g_bg_task[i].m_cmd);
+        fprintf(stdout, "\t Тип процесса: %d\n", g_bg_task[i].m_type);
+        fprintf(stdout, "\t Статус процесса: %d\n\n", g_bg_task[i].m_status);
+    }
+
     return 0;
 }
 
@@ -45,12 +69,12 @@ int help(size_t argc, char **argv)
 {
     char* cmds[] = 
     {
+        "pbg - печать всех background процессов",
         "out - выход из оболочки",
         "cd - смена директории",
-        "tka - завершение всех процессов",
         "watch - что-то очень долго выполняющееся (для теста аргумента &) ",
-        "pbg - печать информации о background процессах",
         "help - печать информации о доступных командах",
+        "exit [PID] - удаление дочернего процесса",
         NULL
     };
 
@@ -135,11 +159,10 @@ int killBGTask(task_t* src, bool (*f)(task_t*, task_t*))
     // проходимся по всем задачам и ищем подходящую
     for(; i < g_bg_count; i++)
     {
-        INFO("Сравниваем %d с %d\n", src->m_pid_id, g_bg_task[i].m_pid_id);
         // если переданная функция верна
         // (то есть такой процесс есть в списке дочерних процессов)
         // удаляем процесс
-        if(f(src, g_bg_task + i))
+        if(f(src, g_bg_task + i) && g_bg_task[i].m_status != FINISHED)
         {
             if(kill(g_bg_task[i].m_pid_id, SIGTERM) != 0)
             {
@@ -167,11 +190,10 @@ int killBGTask(task_t* src, bool (*f)(task_t*, task_t*))
 // массив возможных main задач (не из PATH)
 char *g_main_task_list[MAIN_LIST_SIZE] = 
 {
+    "pbg",
     "out",
     "cd",
-    "tka",
     "skoof",
-    "pbg",
     "help",
     "exit"
 };
@@ -199,11 +221,10 @@ int isItFromMainTaskList(char *task_name)
 // массив указателей на функции, которые могут быть исполнены в main 
 int(*g_main_task_func[MAIN_LIST_SIZE])(size_t, char **) =
 {
+    pbg,
     out,
     cd,
-    tka,
     skoof,
-    pbg,
     help,
     exitt
 };
