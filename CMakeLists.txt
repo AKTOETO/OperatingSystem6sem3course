@@ -21,6 +21,8 @@ set(INCLUDES ${PROJECT_SOURCE_DIR}/includes)
 # src folder
 set(SRC ${PROJECT_SOURCE_DIR}/src)
 
+#############################
+# LIBS
 # error lib
 add_library(errors STATIC ${SRC}/errors.c ${INCLUDES}/errors.h)
 target_include_directories(errors PRIVATE ${INCLUDES})
@@ -28,28 +30,34 @@ target_include_directories(errors PRIVATE ${INCLUDES})
 # file lib
 add_library(files STATIC ${SRC}/file.c ${INCLUDES}/file.h)
 target_include_directories(files PRIVATE ${INCLUDES})
+target_link_libraries(files errors)
+
+# msg lib
+add_library(msg STATIC ${SRC}/msg.c ${INCLUDES}/msg.h)
+target_include_directories(msg PRIVATE ${INCLUDES})
+target_link_libraries(msg errors)
+
+set(LINK_LIBS errors files msg)
+#############################
 
 # included libs
-set(LINK_LIBS ${errors} ${files})
 
 # reader
-set(READER_C ${SRC}/reader.c)
-add_executable(reader ${READER_C})
+add_executable(reader ${SRC}/reader.c)
 target_include_directories(reader PRIVATE ${INCLUDES})
-target_link_libraries(reader errors files)
+target_link_libraries(reader ${LINK_LIBS})
 
 # xorer
-set(XORER_C ${SRC}/reader.c)
-add_executable(xorer ${XORER_C})
+add_executable(xorer ${SRC}/xorer.c)
 target_include_directories(xorer PRIVATE ${INCLUDES})
-target_link_libraries(xorer errors files)
+target_link_libraries(xorer ${LINK_LIBS})
 
 
 # # all .c
 # file(GLOB_RECURSE SRC ${PROJECT_SOURCE_DIR}/src/*.c)
 
 # # all .h
-# file(GLOB_RECURSE HDRS ${PROJECT_SOURCE_DIR}/INCLUDES/*.h)
+# file(GLOB_RECURSE HDRS ${PROJECT_SOURCE_DIR}/includes/*.h)
 
 # add_executable(${CMAKE_PROJECT_NAME} ${SRC} ${HDRS})
 

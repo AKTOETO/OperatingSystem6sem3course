@@ -87,6 +87,23 @@ int setFilepath(File* f, const char* path)
     return OK;
 }
 
+int setFileBufferSize(File *f, const char *buffer, size_t size)
+{
+    // если файл не создан
+    FILE_EXISTANCE;
+
+    // сохранение размера буфера
+    f->m_size = size;
+
+    // выделение памяти под буфер
+    f->m_buffer = realloc(f->m_buffer, f->m_size);
+
+    // копирование буфера
+    strncpy(f->m_buffer, buffer,f->m_size);
+
+    return OK;
+}
+
 int setFileBuffer(File *f, const char *buffer)
 {
     // если файл не создан

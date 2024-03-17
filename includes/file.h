@@ -6,16 +6,11 @@
 // структура файла
 typedef struct
 {
-    int m_id; // дескриптор файла
-    
-    char* m_path; // путь к файлу
-
-    size_t m_path_size; // размер пути к файлу
-    
-    char* m_buffer; // информация в нем
-    
-    size_t m_size; // размер буфера
-
+    int m_id;           // дескриптор файла    
+    char* m_path;       // путь к файлу
+    size_t m_path_size; // размер пути к файлу    
+    char* m_buffer;     // информация в нем    
+    size_t m_size;      // размер буфера
 } File;
 
 // проверки для выполнения
@@ -38,6 +33,9 @@ int deleteFile(File* f);
 
 // установить файловый путь 
 int setFilepath(File* f, const char* path);
+
+// установить буфер файла
+int setFileBufferSize(File* f, const char* buffer, size_t size);
 
 // установить буфер файла
 int setFileBuffer(File* f, const char* buffer);
