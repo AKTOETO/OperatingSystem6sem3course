@@ -1,38 +1,32 @@
 #include "msg.h"
 
-// символ для выполнения операции xor по умолчанию
-// используется, если один из буферов опустел, а другой - нет
-#define DEF_XOR_CHAR '1'
-
+// ксорим каждый бит данных с каждым битом ключа
 void xor(char **out_buf, ssize_t *ob_sz,
          char *data, ssize_t data_sz,
          char *key, ssize_t key_sz)
 {
     INFO("Исходный буфер: %p\n", *out_buf);
-    INFO("Размер первого буфера: %ld\n", data_sz);
-    INFO("Размер второго буфера: %ld\n", key_sz);
-    INFO("последний символ в буфере data: [%c]\n", data[data_sz]);
+    INFO("Размер буфера данных: %ld\n", data_sz);
+    INFO("Размер буфера ключа: %ld\n", key_sz);
+    INFO("Последний символ в буфере data: [%c]\n", data[data_sz]);
+    INFO("Буфер: [%s]\n", data);
 
     // перевыделение памяти под буфер
-    ssize_t max_new_sz = (data_sz > key_sz ? --data_sz : --key_sz);
+    ssize_t max_new_sz = data_sz;
     INFO("Добавляем %ld байт\n", max_new_sz);
-    *out_buf = realloc(*out_buf, *ob_sz + max_new_sz);
-    INFO("Новый размер выходного буфера %ld\n", *ob_sz + max_new_sz);
 
+    *out_buf = realloc(*out_buf, *ob_sz + max_new_sz);
+
+    INFO("Новый размер выходного буфера %ld\n", *ob_sz + max_new_sz);
     INFO("Новая память: %p\n", *out_buf);
 
     // проходимся по конечному буферу и выполняем xor
-    for(ssize_t i = 0; i < *ob_sz + max_new_sz - 1; i++)
+    for(ssize_t i = 0; i < max_new_sz; i++)
     {
-        // если есть первый и второй буфер
-        if(i < data_sz && i < key_sz)
-            (*out_buf)[i + *ob_sz] = data[i] ^ key[i];
-        // если нет второго
-        if(i >= key_sz)
-            (*out_buf)[i + *ob_sz] = data[i] ^ DEF_XOR_CHAR;
-        // если нет первого
-        if(i >= data_sz)
-            (*out_buf)[i + *ob_sz] = key[i] ^ DEF_XOR_CHAR;
+        (*out_buf)[i + *ob_sz] = data[i] ^ key[i % key_sz];
+        //INFO("Cимвол на позиции: %ld: %c\n", i + *ob_sz, (*out_buf)[i + *ob_sz]);
+        if(data[i] == '\0')
+            INFO("найден \\0 на позиции: %ld из возможных: %ld\n", i, max_new_sz);
     }
 
     // печать буфера
@@ -125,6 +119,10 @@ int main(int argc, char **argv)
     // читаем, пока количество считанных байт не меньше размера буфера
     do
     {
+        // сброс буферов
+        memset(recv[0].m_buffer,'\0', MSGBUF);
+        memset(recv[1].m_buffer,'\0', MSGBUF);
+        
         // пытаемся прочитать сообщение
         if((bytes[0] = msgrcv(msgqid, (void *)&recv[0], MSGBUF, 0, 0)) == -1)
         {
@@ -139,10 +137,13 @@ int main(int argc, char **argv)
             return -1;
         }
 
+        INFO("pid1: %ld\n", recv[0].m_num);
+        INFO("pid2: %ld\n", recv[1].m_num);
+
         // выполнение операции xor
         xor(&out, &out_size, recv[0].m_buffer, bytes[0], recv[1].m_buffer, bytes[1]);
 
-    } while(bytes[0] == MSGBUF - 1 || bytes[1] == MSGBUF - 1);
+    } while(bytes[0] != 0 && bytes[1] == MSGBUF - 1);
 
     // удаление очереди сообщений
     if(msgctl(msgqid, IPC_RMID, 0) == -1)

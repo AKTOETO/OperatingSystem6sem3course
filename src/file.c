@@ -99,7 +99,7 @@ int setFileBufferSize(File *f, const char *buffer, size_t size)
     f->m_buffer = realloc(f->m_buffer, f->m_size);
 
     // копирование буфера
-    strncpy(f->m_buffer, buffer,f->m_size);
+    strncpy(f->m_buffer, buffer, f->m_size);
 
     return OK;
 }

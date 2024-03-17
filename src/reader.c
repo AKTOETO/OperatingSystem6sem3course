@@ -47,17 +47,18 @@ int main(int argc, char **argv)
     {
         // читаем буфер
         read_byte = read(f->m_id, msg.m_buffer, MSGBUF - 1);
-        msg.m_buffer[read_byte] = '\0';
-
         INFO("Количество считанных байт: %ld\n", read_byte);
-        INFO("Буфер: [%s]\n", msg.m_buffer);
-
+        
         // ошибка при чтении
         if(read_byte == -1)
         {
             ERRORS("Ошибка при чтении\n");
             return -1;
         }
+        msg.m_buffer[read_byte] = '\0';
+
+        INFO("Последний символ: [%c]\n", msg.m_buffer[read_byte]);
+        INFO("Буфер: [%s]\n", msg.m_buffer);
 
         // тип
         msg.m_num = getpid();
