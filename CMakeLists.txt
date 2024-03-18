@@ -52,6 +52,11 @@ add_executable(xorer ${SRC}/xorer.c)
 target_include_directories(xorer PRIVATE ${INCLUDES})
 target_link_libraries(xorer ${LINK_LIBS})
 
+# close
+add_executable(clear ${SRC}/clear.c)
+target_include_directories(clear PRIVATE ${INCLUDES})
+target_link_libraries(clear ${LINK_LIBS})
+
 
 # # all .c
 # file(GLOB_RECURSE SRC ${PROJECT_SOURCE_DIR}/src/*.c)
