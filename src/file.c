@@ -228,14 +228,6 @@ int writeFile(File *f)
     FILE_SIZE_EXISTANCE;       
     FILE_BUFER_EXISTANCE;        
 
-    // печать буфера
-    INFOS("Печать буфера\n[");
-    for(ssize_t i = 0; i <= f->m_size+1; i++)
-    {
-        putchar(f->m_buffer[i]);
-    }
-    printf("]\n");
-
     // записываем сколько байт записалось
     int write_bytes = write(f->m_id, f->m_buffer, f->m_size);
 

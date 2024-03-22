@@ -43,29 +43,12 @@ int main(int argc, char **argv)
     // количество считанных байт
     ssize_t read_byte = 0;
 
-    //INFO("Полученный буфер: [%s]\n", msg.m_buffer);
-
     // считывание сообщения и параллельная отправка его  
     do
     {
-        // // читаем буфер
-        // read_byte = read(f->m_id, msg.m_buffer, MSG_ALL_BUF_SIZE - 1);
-        // INFO("Количество считанных байт: %ld\n", read_byte);
-        
-        // // ошибка при чтении
-        // if(read_byte == -1)
-        // {
-        //     ERRORS("Ошибка при чтении\n");
-        //     return -1;
-        // }
-        // msg.m_buffer[read_byte] = '\0';
-
-        // INFO("Последний символ: [%c]\n", msg.m_buffer[read_byte]);
-        // INFO("Буфер: [%s]\n", msg.m_buffer);
-
         // читаем буфер
         read_byte = msgReadBufer(f, &msg);
-        //INFO("red: %ld\n", read_byte);
+        
         // тип
         msg.m_num = getpid();
 
@@ -75,15 +58,15 @@ int main(int argc, char **argv)
            ERRORS("Сообщение не было корректно отправлено\n");
            return -1;
         }
-    } while(read_byte != 0);
+    } 
+    // читаем пока есть сообщения
+    while(read_byte != 0);
 
     // закрыть дескриптор
     closeFile(f);
 
     // удалить файл
     deleteFile(f);
-
-    //msgCloseQ(msgqid);
 
     return 0;
 }

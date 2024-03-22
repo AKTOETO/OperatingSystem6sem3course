@@ -20,18 +20,6 @@ typedef struct
 // чтение буфера из файла
 ssize_t msgReadBufer(File *f, msg_t *msg);
 
-// разделение полученного сообщения
-ssize_t msgSplitBuffer(msg_t *msg, char *buffer);
-
-// чтение из сообщения
-ssize_t msgReadSizeBuffer(msg_t *msg);
-
-// отправка сообщения
-int msqSend(File *f);
-
-// получение сообщения
-int msgRecv(File **f);
-
 // закрыть очередь
 int msgCloseQ(int msgqid);
 

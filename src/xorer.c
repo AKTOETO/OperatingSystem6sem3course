@@ -5,20 +5,11 @@ void xor(char *data, ssize_t data_size,
          char *key, ssize_t key_size)
 {
     INFOS("======XOR======\n");
-    //INFO("Исходный буфер: %p\n", *out_buf);
-    //INFO("Размер буфера данных: %ld\n", data_sz);
-    //INFO("Размер буфера ключа: %ld\n", key_sz);
-    //INFO("Последний символ в буфере data: [%c]\n", data[data_sz]);
-    //INFO("Буфер: [%s]\n", data);
 
     // проходимся по конечному буферу и выполняем xor
     for(ssize_t i = 0; i < data_size; i++)
     {
-        char new_ch = data[i] ^ key[i % key_size];
-        //INFO("Cимвол на позиции: %ld: %c\n", i + *ob_sz, (*out_buf)[i + *ob_sz]);
-        //if(new_ch == '\0')
-        //    INFO("найден \\0 на позиции: [%ld] ключ[%ld]: [%c] со значением: [%c]\n", i, i % key_size, key[i % key_size], data[i]);
-        data[i] = new_ch;
+        data[i] ^= key[i % key_size];
     }
 
     // печать буфера
@@ -39,7 +30,6 @@ void add(char **data, ssize_t *data_size, char *add, ssize_t add_size)
     *data = realloc(*data, *data_size + add_size);
 
     // копируем информацию в основной буфер
-    //strncpy(*data + *data_size, add, add_size);
     memcpy(*data + *data_size, add, add_size);
 
     // изменяем размер буфера
@@ -136,9 +126,6 @@ int main(int argc, char **argv)
     // собираем буферы с двух процессов
     do
     {
-        // сброс буфера чтения
-        //memset(recv.m_buffer,'\0', MSG_ALL_BUF_SIZE);
-        
         // пытаемся прочитать сообщение
         if((bytes = msgrcv(msgqid, (void *)&recv, MSG_LEN, 0, 0)) == -1)
         {
@@ -148,10 +135,6 @@ int main(int argc, char **argv)
 
         INFO("pid: %ld\n", recv.m_num);
         INFO("Считано байт: [%ld]\n", recv.m_buffer_size);
-        //INFO("Считано сообщение: [%s]\n", recv.m_buffer);
-
-        // получение размера буфера
-        //bytes = msgReadSizeBuffer(&recv);
 
         // если размер сообщения 0
         if(recv.m_buffer_size == 0)
@@ -167,7 +150,6 @@ int main(int argc, char **argv)
         {
             INFOS("Добавление в буфер данных\n");
             add(&out1, &out1_size, recv.m_buffer, recv.m_buffer_size);
-            INFO("размер буфера после перевыделения памяти: %ld\n", out1_size);
         }
         // иначе просто меняем буферы местами
         else if (!is_red2 && recv.m_num == pid[1])
@@ -185,21 +167,12 @@ int main(int argc, char **argv)
     INFO("СЧИТАННЫЕ БУФЕРЫ:\n\n<%s>\n\n", out1);
     INFO("СЧИТАННЫЕ БУФЕРЫ:\n\n<%s>\n\n", out2);
 
-
-
-    // буфер xor
-    //char *out2 = NULL;
-    //ssize_t out2_size = 0;
-
-
-    // // выполнение операции xor
-    // xor(&out1, &out1_size, recv[0].m_buffer, bytes[0], recv[1].m_buffer, bytes[1]);
+    // выполнение операции xor
     xor(out1, out1_size, out2, out2_size);
 
     // удаление очереди сообщений
     msgCloseQ(msgqid);
 
-    INFO("Размер выходного буфера: %ld\n", out1_size);
     // выходной файл
     File *f = createFile();
     setFilepath(f, "xor.txt");
