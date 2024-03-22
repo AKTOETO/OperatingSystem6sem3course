@@ -57,6 +57,10 @@ add_executable(clear ${SRC}/clear.c)
 target_include_directories(clear PRIVATE ${INCLUDES})
 target_link_libraries(clear ${LINK_LIBS})
 
+# generator
+add_executable(generator ${SRC}/generator.c)
+target_include_directories(generator PRIVATE ${INCLUDES})
+target_link_libraries(generator ${LINK_LIBS})
 
 # # all .c
 # file(GLOB_RECURSE SRC ${PROJECT_SOURCE_DIR}/src/*.c)

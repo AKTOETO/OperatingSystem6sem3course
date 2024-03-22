@@ -10,7 +10,7 @@
 typedef struct
 {
     long int m_num;                 // pid процесса, сформировавшего сообщение
-    char m_buffer[MSG_BUFFER_SIZE];// информация в сообщении
+    char m_buffer[MSG_BUFFER_SIZE]; // информация в сообщении
     long m_buffer_size;             // размер буфера сообщения
 } msg_t;
 
