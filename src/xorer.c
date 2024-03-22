@@ -12,7 +12,7 @@ void xor(char *data, ssize_t data_size,
     //INFO("Буфер: [%s]\n", data);
 
     // проходимся по конечному буферу и выполняем xor
-    for(ssize_t i = 0; i < key_size; i++)
+    for(ssize_t i = 0; i < data_size; i++)
     {
         char new_ch = data[i] ^ key[i % key_size];
         //INFO("Cимвол на позиции: %ld: %c\n", i + *ob_sz, (*out_buf)[i + *ob_sz]);
