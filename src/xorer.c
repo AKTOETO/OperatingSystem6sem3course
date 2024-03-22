@@ -21,8 +21,6 @@ void xor(char *data, ssize_t data_size,
     printf("]\n");
 }
 
-
-
 // дописываем в буфер инфу
 void add(char **data, ssize_t *data_size, char *add, ssize_t add_size)
 {
@@ -37,6 +35,41 @@ void add(char **data, ssize_t *data_size, char *add, ssize_t add_size)
     INFO("Новый размер буфера: %ld\n", *data_size);
 }
 
+// создание процесса чтения
+void createReader(char* filepath, pid_t* pid)
+{
+    // запуск первого reader процесса
+    *pid = fork();
+
+    // 1) поток не был создан
+    if(*pid < 0)
+    {
+        ERRORS("Поток не был создан\n");
+    }
+    // 2) сейчас выполняется дочерний процесс
+    if(*pid == 0)
+    {
+        if(execl("reader", "reader", filepath, NULL) == -1)
+        {
+            ERRORS("Не получилось запустить reader\n");
+        }
+        INFOS("exec не выполнен\n");
+        // выход из дочернего процесса
+        exit(0);
+    }
+
+    INFO("Новый пид процесса 0: %d\n", *pid);
+}
+
+// структура чтения всего буфера из очереди
+typedef struct 
+{
+    char *m_data;       // само сообщение
+    ssize_t m_data_size;// размер сообщения
+    bool m_is_read;     // прочитано ли сообщение
+} qdata_t;
+
+
 int main(int argc, char **argv)
 {    
     // если нет пути к файлу - выдаем ошибку
@@ -50,51 +83,12 @@ int main(int argc, char **argv)
     pid_t pid[2];
 
     // запуск первого reader процесса
-    pid[0] = fork();
-
-    // 1) поток не был создан
-    if(pid[0] < 0)
-    {
-        ERRORS("Поток не был создан\n");
-    }
-    // 2) сейчас выполняется дочерний процесс
-    if(pid[0] == 0)
-    {
-        if(execl("reader", "reader", argv[1], NULL) == -1)
-        {
-            ERRORS("Не получилось запустить reader\n");
-        }
-        INFOS("exec не выполнен\n");
-        // выход из дочернего процесса
-        exit(0);
-    }
-
-    INFO("Новый пид процесса 0: %d\n", pid[0]);
+    // (читает данные)
+    createReader(argv[1], &pid[0]);
 
     // запуск второго reader процесса
-    pid[1] = fork();
-
-    // 1) поток не был создан
-    if(pid[1] < 0)
-    {
-        ERRORS("Поток не был создан\n");
-    }
-    // 2) сейчас выполняется дочерний процесс
-    if(pid[1] == 0)
-    {
-        if(execl("reader", "reader", argv[2], NULL) == -1)
-        {
-            ERRORS("Не получилось запустить reader\n");
-        }       
-        // выход из дочернего процесса
-        exit(0);
-    }
-
-    INFO("Новый пид процесса 1: %d\n", pid[1]);
-
-    // ждем добавления всех сообщений в очередь
-    waitpid(pid[0], NULL, 0);
-    waitpid(pid[1], NULL, 0);
+    // (читает ключ)
+    createReader(argv[2], &pid[1]);
 
     // создание очереди сообщений (Если очередь создана, мы просто получим ее id)
     int msgqid = msgget(QKEY, 0666 | IPC_CREAT);
@@ -113,14 +107,10 @@ int main(int argc, char **argv)
     ssize_t bytes;    
 
     // буфер данных
-    char *out1 = NULL;
-    ssize_t out1_size = 0;
-    bool is_red1 = 0;
+    qdata_t data = {NULL, 0, 0};
 
     // буфер ключа
-    char *out2 = NULL;
-    ssize_t out2_size = 0;
-    bool is_red2 = 0;
+    qdata_t key = {NULL, 0, 0};
 
     // читаем, пока количество считанных байт не меньше размера буфера
     // собираем буферы с двух процессов
@@ -136,39 +126,42 @@ int main(int argc, char **argv)
         INFO("pid: %ld\n", recv.m_num);
         INFO("Считано байт: [%ld]\n", recv.m_buffer_size);
 
-        // если размер сообщения 0
+        // если размер сообщения 0 - читать больше нечего из текущего процесса
         if(recv.m_buffer_size == 0)
         {
             if(recv.m_num == pid[0])
-                is_red1 = 1;
+                data.m_is_read = 1;
             else if(recv.m_num == pid[1])
-                is_red2 = 1;
+                key.m_is_read = 1;
         }
-
-        // если пид первого сообщения равен pid[0], дополняем первый буфер
-        if(!is_red1 && recv.m_num == pid[0])
+        else 
         {
-            INFOS("Добавление в буфер данных\n");
-            add(&out1, &out1_size, recv.m_buffer, recv.m_buffer_size);
+            // если пид первого сообщения равен pid[0], дополняем первый буфер
+            if(recv.m_num == pid[0])
+            {
+                INFOS("Добавление в буфер данных\n");
+                add(&data.m_data, &data.m_data_size, recv.m_buffer, recv.m_buffer_size);
+            }
+            // иначе просто меняем буферы местами
+            else if (recv.m_num == pid[1])
+            {
+                add(&key.m_data, &key.m_data_size, recv.m_buffer, recv.m_buffer_size);     
+                INFOS("Ключ добавлен\n");     
+            }   
         }
-        // иначе просто меняем буферы местами
-        else if (!is_red2 && recv.m_num == pid[1])
-        {
-            add(&out2, &out2_size, recv.m_buffer, recv.m_buffer_size);     
-            INFOS("Ключ добавлен\n");     
-        }
-        
-    } while(!is_red1 || !is_red2);
+    }
+    // пока не прочитали оба файла 
+    while(!data.m_is_read || !key.m_is_read);
 
-    INFO("Размер выходного буфера 1: %ld\n", out1_size);
-    INFO("Размер выходного буфера 2: %ld\n", out2_size);
-    out1[out1_size] = '\0';
-    out2[out2_size] = '\0';
-    INFO("СЧИТАННЫЕ БУФЕРЫ:\n\n<%s>\n\n", out1);
-    INFO("СЧИТАННЫЕ БУФЕРЫ:\n\n<%s>\n\n", out2);
+    INFO("Размер выходного буфера 1: %ld\n", data.m_data_size);
+    INFO("Размер выходного буфера 2: %ld\n", key.m_data_size);
+    data.m_data[data.m_data_size] = '\0';
+    key.m_data[key.m_data_size] = '\0';
+    INFO("СЧИТАННЫЕ БУФЕРЫ:\n\n<%s>\n\n", data.m_data);
+    INFO("СЧИТАННЫЕ БУФЕРЫ:\n\n<%s>\n\n", key.m_data);
 
     // выполнение операции xor
-    xor(out1, out1_size, out2, out2_size);
+    xor(data.m_data, data.m_data_size, key.m_data, key.m_data_size);
 
     // удаление очереди сообщений
     msgCloseQ(msgqid);
@@ -177,14 +170,14 @@ int main(int argc, char **argv)
     File *f = createFile();
     setFilepath(f, "xor.txt");
     openOutputFile(f);
-    setFileBufferSize(f, out1, out1_size);
+    setFileBufferSize(f, data.m_data, data.m_data_size);
     writeFile(f);
     closeFile(f);
     deleteFile(f);
 
     // удаление буфера
-    free(out1);
-    free(out2);
+    free(data.m_data);
+    free(key.m_data);
 
     return 0;
 }
