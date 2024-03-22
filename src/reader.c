@@ -64,19 +64,18 @@ int main(int argc, char **argv)
         // INFO("Буфер: [%s]\n", msg.m_buffer);
 
         // читаем буфер
-        read_byte = msgReadBufer(f, &msg) + MSG_LEN_SIZE;
-        INFO("red: %ld\n", read_byte);
-
+        read_byte = msgReadBufer(f, &msg);
+        //INFO("red: %ld\n", read_byte);
         // тип
         msg.m_num = getpid();
 
         // отправляем сообщение
-        if(msgsnd(msgqid, (void *)&msg, read_byte, 0) <= -1)
+        if(msgsnd(msgqid, (void *)&msg, MSG_LEN, 0) <= -1)
         {
-            ERRORS("Сообщение не было корректно отправлено\n");
-            return -1;
+           ERRORS("Сообщение не было корректно отправлено\n");
+           return -1;
         }
-    } while(read_byte - MSG_LEN_SIZE != 0);
+    } while(read_byte != 0);
 
     // закрыть дескриптор
     closeFile(f);

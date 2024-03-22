@@ -4,22 +4,24 @@
 #include "file.h"
 
 #define QKEY 789456
-#define MSG_ALL_BUF_SIZE 1024
-#define MSG_LEN_SIZE 8 
-#define MSG_BUFFER_SIZE MSG_ALL_BUF_SIZE - MSG_LEN_SIZE - 1
+#define MSG_BUFFER_SIZE 1024
 
 // структура сообщеиня
 typedef struct
 {
-    long int m_num;
-    char m_buffer[MSG_ALL_BUF_SIZE];
+    long int m_num;                 // pid процесса, сформировавшего сообщение
+    char m_buffer[MSG_BUFFER_SIZE];// информация в сообщении
+    long m_buffer_size;             // размер буфера сообщения
 } msg_t;
 
-// m_buffer:
-// |size| buffer |\0|
+// длина сообщения
+#define MSG_LEN (sizeof(msg_t) - sizeof(long))
 
 // чтение буфера из файла
 ssize_t msgReadBufer(File *f, msg_t *msg);
+
+// разделение полученного сообщения
+ssize_t msgSplitBuffer(msg_t *msg, char *buffer);
 
 // чтение из сообщения
 ssize_t msgReadSizeBuffer(msg_t *msg);

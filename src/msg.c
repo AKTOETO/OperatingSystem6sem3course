@@ -2,17 +2,19 @@
 
 ssize_t msgReadBufer(File *f, msg_t *msg)
 {
-    // временный буфер чтения
-    char temp[MSG_BUFFER_SIZE + 1];
-
     // читаем во временный буфер и запоминаем сколько байт считалось
-    ssize_t read_byte = read(f->m_id, temp, MSG_BUFFER_SIZE);
-    INFO("считанной количество байт: %ld из максимума: %d\n", read_byte, MSG_BUFFER_SIZE);
-    temp[read_byte] = '\0';
+    msg->m_buffer_size = read(f->m_id, msg->m_buffer, MSG_BUFFER_SIZE);
+    INFO("Считанно количество байт: %ld из максимума: %d\n", msg->m_buffer_size, MSG_BUFFER_SIZE);
+    return msg->m_buffer_size;
+}
 
-    // записываем конечный буфер
-    snprintf(msg->m_buffer, MSG_ALL_BUF_SIZE, "%ld%s", read_byte, temp);
-    INFO("Считанный буфер: [%s]\n", msg->m_buffer);
+ssize_t msgSplitBuffer(msg_t *msg, char *buffer)
+{
+    // количество байт
+    ssize_t read_byte = 0;
+
+    // чтение щаблона буфера
+    sscanf(msg->m_buffer, "%ld%s", &read_byte, buffer);
 
     return read_byte;
 }

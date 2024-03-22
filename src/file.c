@@ -99,7 +99,7 @@ int setFileBufferSize(File *f, const char *buffer, size_t size)
     f->m_buffer = realloc(f->m_buffer, f->m_size);
 
     // копирование буфера
-    strncpy(f->m_buffer, buffer, f->m_size);
+    memcpy(f->m_buffer, buffer, f->m_size);
 
     return OK;
 }
@@ -227,6 +227,14 @@ int writeFile(File *f)
     FILE_DESCRIPTOR_EXISTANCE;
     FILE_SIZE_EXISTANCE;       
     FILE_BUFER_EXISTANCE;        
+
+    // печать буфера
+    INFOS("Печать буфера\n[");
+    for(ssize_t i = 0; i <= f->m_size+1; i++)
+    {
+        putchar(f->m_buffer[i]);
+    }
+    printf("]\n");
 
     // записываем сколько байт записалось
     int write_bytes = write(f->m_id, f->m_buffer, f->m_size);
