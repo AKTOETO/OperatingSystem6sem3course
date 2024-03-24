@@ -1,11 +1,11 @@
 #ifndef INCLUDES_H
 #define INCLUDES_H
 
-#define _GNU_SOURCE
-
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <math.h>
 
 #include <sys/wait.h>
 #include <sys/types.h>
