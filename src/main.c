@@ -2,7 +2,10 @@
 
 int main(int argc, char **argv)
 {
-    
-    INFOS("jopa");
+    Image img;
+    imageLoad(&img, "1.png");
+    imageSave(&img, "2.png");
+    imageFree(&img);
+
     return 0;
 }

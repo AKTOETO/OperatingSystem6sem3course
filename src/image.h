@@ -3,8 +3,6 @@
 
 #include "errors.h"
 
-#include "stb_image.h"
-#include "stb_image_write.h"
 
 // перечисление для отследивания того, что создал картинку
 enum AllocType
@@ -32,7 +30,7 @@ void imageLoad(Image *img, const char *filename);
 void imageCreate(Image *img, int width, int height, int channels, bool zeroed);
 
 // сохранение картинки на диск
-void inageSave(const Image *img, const char *filename);
+void imageSave(const Image *img, const char *filename);
 
 // освобождение памяти картинки
 void imageFree(Image *img);
