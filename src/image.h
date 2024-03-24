@@ -38,9 +38,16 @@ void imageSave(const Image *img, const char *filename);
 // освобождение памяти картинки
 void imageFree(Image *img);
 
-// применение фильтра собела
+// применение фильтра собела в однопоточном режиме
 // @param src исходная картинка
 // @param dest картинка с примененным фильтром
 void imageApplySobel(const Image *src, Image *dest);
+
+// применение фильтра Собеля в многопоточном режиме
+// @param src исходная картинка
+// @param dest картинка с примененным фильтром
+// @param threads количество потоков
+void imageApplySobelMt(const Image *src, Image *dest, int threads);
+
 
 #endif // !IMAGE_H

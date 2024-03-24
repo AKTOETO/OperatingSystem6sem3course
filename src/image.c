@@ -86,7 +86,7 @@ void imageSave(const Image *img, const char *filename)
     {
         stbi_write_jpg(
             filename, img->m_width, img->m_height, img->m_channels,
-            img->m_data, 100);
+            img->m_data, 50);
     }
     // если имя файла заканчивается на png, пишем в png файл
     else if(strEndArrIn(filename, png_end, 2))
@@ -186,4 +186,9 @@ void imageApplySobel(const Image *src, Image *dest)
         }
     }
     INFOS("Фильтер Собеля применен\n");
+}
+
+void imageApplySobelMt(const Image *src, Image *dest, int threads)
+{
+
 }
