@@ -165,12 +165,12 @@ void imageApplySobel(const Image *src, Image *dest)
             {
                 for (int i = -1; i <= 1; i++)
                 {
-                    int index = ((y + j) * src->m_width + (x + i));
+                    int index = ((y + j) * src->m_width + (x + i)) * src->m_channels;
                     gX += src->m_data[index] * kernelX[(j + 1) * 3 + (i + 1)];
                     gY += src->m_data[index] * kernelY[(j + 1) * 3 + (i + 1)];
                 }
             }
-            dest->m_data[y * src->m_width + x] = sqrt(gX * gX + gY * gY);
+            dest->m_data[(y * src->m_width + x) * src->m_channels] = sqrt(gX * gX + gY * gY);
         }
     }
     INFOS("Фильтер Собеля применен\n");
