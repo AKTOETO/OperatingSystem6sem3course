@@ -30,5 +30,5 @@ target_link_libraries(main stb m)
 
 # if debug add flags
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_options(main PRIVATE "-Wall -Werror -fsanitize=address -g")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -fsanitize=address -g")
 endif()

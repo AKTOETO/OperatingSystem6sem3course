@@ -2,10 +2,14 @@
 
 int main(int argc, char **argv)
 {
-    Image img;
+    Image img, img2;
     imageLoad(&img, "1.png");
-    imageSave(&img, "2.png");
+
+    imageApplySobel(&img, &img2);
+    imageSave(&img2, "sobel.png");
+    
     imageFree(&img);
+    imageFree(&img2);
 
     return 0;
 }

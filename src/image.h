@@ -23,6 +23,9 @@ typedef struct
     enum AllocType m_alloc; // тип выделения памяти под картиинку
 } Image;
 
+// печать информации о картинки
+void imageInfo(Image *img);
+
 // загрузка картинки с диска
 void imageLoad(Image *img, const char *filename);
 
@@ -38,6 +41,6 @@ void imageFree(Image *img);
 // применение фильтра собела
 // @param src исходная картинка
 // @param dest картинка с примененным фильтром
-void ImageApplySobel(const Image *src, const Image *dest);
+void imageApplySobel(const Image *src, Image *dest);
 
 #endif // !IMAGE_H

@@ -36,18 +36,18 @@ void applySobelFilter(int image[][3], int result[][3]) {
     };
     for (int i = 1; i < 2; i++) {
         for (int j = 1; j < 2; j++) {
-        gx = 0;
-        gy = 0;
-        // Применяем ядра фильтра Собела к пикселям изображения
-        for (int k = -1; k <= 1; k++) {
-            for (int l = -1; l <= 1; l++) {
-                gx += image[i + k][j + l] * kernelX[k + 1][l + 1];
-                gy += image[i + k][j + l] * kernelY[k + 1][l + 1];
-            
+            gx = 0;
+            gy = 0;
+            // Применяем ядра фильтра Собела к пикселям изображения
+            for (int k = -1; k <= 1; k++) {
+                for (int l = -1; l <= 1; l++) {
+                    gx += image[i + k][j + l] * kernelX[k + 1][l + 1];
+                    gy += image[i + k][j + l] * kernelY[k + 1][l + 1];
+                
+                }
             }
-        }
             // Вычисляем градиент изображения
-        result[i][j] = sqrt(gx * gx + gy * gy);
+            result[i][j] = sqrt(gx * gx + gy * gy);
         }
     }
 }

@@ -1,5 +1,23 @@
 #include "image.h"
 
+void imageInfo(Image *img)
+{
+    /*
+    int m_width;            // ширина картинки
+    int m_height;           // высота картинки
+    int m_channels;         // количество каналов
+    size_t m_size;          // размер картинки в байтах
+    enum AllocType m_alloc;
+    */
+   printf("=====================\nИнформация о картинке\n=====================\n");
+   printf("width: %d\n",    img->m_width);
+   printf("height: %d\n",   img->m_height);
+   printf("channels: %d\n", img->m_channels);
+   printf("size: %ld\n",     img->m_size);
+   printf("alloc: %d\n",    img->m_alloc);
+   printf("=====================\n");
+}
+
 // загрузка картинки с диска
 void imageLoad(Image *img, const char *filename)
 {
@@ -15,18 +33,20 @@ void imageLoad(Image *img, const char *filename)
     {
         img->m_alloc = NO_ALLOCATION;
         ERROR("Не удалось создать картинку: <%s>\n", filename);
+        return;
     }
+    INFOS("Картинка загружена\n");
 }
 
 // создание новой картинки
 void imageCreate(Image *img, int width, int height, int channels, bool zeroed)
 {
-    img->m_size = img->m_width * img->m_height * img->m_channels;
+    img->m_size = width * height * channels;
     // если есть флаг zeroed, выделяем обнуленную память
     if(zeroed)
-        img->m_data = calloc(img->m_size, 1);
+        img->m_data = calloc(img->m_size, sizeof(uint8_t));
     else
-        img->m_data = malloc(img->m_size);
+        img->m_data = malloc(img->m_size * sizeof(uint8_t));
     
     // самостоятельно создаем картинку
     if(img->m_data != NULL)
@@ -37,7 +57,12 @@ void imageCreate(Image *img, int width, int height, int channels, bool zeroed)
         img->m_alloc = SELF_ALLOCATION;
     }
     else
+    {
         ERRORS("Ошибка при выделении памяти под картинку\n");
+        return;
+    }
+
+    INFOS("Картинка создана\n");
 }
 
 // сохранение картинки на диск
@@ -74,8 +99,10 @@ void imageSave(const Image *img, const char *filename)
     else
     {
         ERROR("Неизвестное расширение файла: <%s>\n", filename);
+        return;
     }
     
+    INFO("Картинка сохранена: <%s>\n", filename);
 }
 
 // освобождение памяти картинки
@@ -101,11 +128,50 @@ void imageFree(Image *img)
         img->m_size = 0;
         img->m_alloc = NO_ALLOCATION;
     }
+    INFOS("Картинка удалена\n");
 }
 
 // применение фильтра собела
 // @param src исходная картинка
 // @param dest картинка с примененным фильтром
-void ImageApplySobel(const Image *src, const Image *dest)
+void imageApplySobel(const Image *src, Image *dest)
 {
+    // если картинка не выделена
+    if(src->m_alloc == NO_ALLOCATION || src->m_data == NULL)
+    {
+        ERRORS("Картинка не выделена\n");
+        return;
+    }
+
+    // создание новой картинки
+    imageCreate(dest, src->m_width, src->m_height, src->m_channels, false);
+
+    // ядра яильтра Собеля
+    int kernelX[] = {-1, 0, 1, -2, 0, 2, -1, 0, 1};
+    int kernelY[] = {1, 2, 1, 0, 0, 0, -1, -2, -1};
+
+    // генерируем новый список данных для картинки
+    // проходимся по каждой строке
+    for (int y = 1; y < src->m_height - 1; y++)
+    {
+        // проходимся по каждому столбцу
+        for (int x = 1; x < src->m_width - 1; x++)
+        {
+            // в итоге обрабатываем каждый пиксель
+            int gX = 0;
+            int gY = 0;
+
+            for (int j = -1; j <= 1; j++)
+            {
+                for (int i = -1; i <= 1; i++)
+                {
+                    int index = ((y + j) * src->m_width + (x + i));
+                    gX += src->m_data[index] * kernelX[(j + 1) * 3 + (i + 1)];
+                    gY += src->m_data[index] * kernelY[(j + 1) * 3 + (i + 1)];
+                }
+            }
+            dest->m_data[y * src->m_width + x] = sqrt(gX * gX + gY * gY);
+        }
+    }
+    INFOS("Фильтер Собеля применен\n");
 }
