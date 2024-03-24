@@ -170,7 +170,16 @@ void imageApplySobel(const Image *src, Image *dest)
                     gY += src->m_data[index] * kernelY[(j + 1) * 3 + (i + 1)];
                 }
             }
-            dest->m_data[(y * src->m_width + x) * src->m_channels] = sqrt(gX * gX + gY * gY);
+            // вычисляем значение
+            double magnitude = sqrt(gX * gX + gY * gY);
+
+            // обрещаем его, чтобы оно быол в границах [0.255]
+            magnitude = fmin(255, fmax(0, magnitude));
+
+            // присваиваем значения трем каналам (RGB)
+            dest->m_data[((y - 1) * src->m_width + (x - 1)) * src->m_channels]     = (uint8_t)magnitude;
+            dest->m_data[((y - 1) * src->m_width + (x - 1)) * src->m_channels + 1] = (uint8_t)magnitude;
+            dest->m_data[((y - 1) * src->m_width + (x - 1)) * src->m_channels + 2] = (uint8_t)magnitude;
         }
     }
     INFOS("Фильтер Собеля применен\n");
