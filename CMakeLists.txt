@@ -32,3 +32,13 @@ target_link_libraries(main stb m)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -fsanitize=address -g")
 endif()
+
+ # copy assets to bin folder
+ add_custom_target(
+    copy_assets ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/assets"
+        "${CMAKE_BINARY_DIR}/bin"
+    COMMENT "Copy assets from ${PROJECT_SOURCE_DIR}/assets to ${CMAKE_BINARY_DIR}/bin"
+)
+add_dependencies(main copy_assets)
