@@ -148,7 +148,7 @@ void imageApplySobel(const Image *src, Image *dest)
 
     // ядра яильтра Собеля
     int kernelX[] = {-1, 0, 1, -2, 0, 2, -1, 0, 1};
-    int kernelY[] = {1, 2, 1, 0, 0, 0, -1, -2, -1};
+    int kernelY[] = {-1, -2, -1, 0, 0, 0, 1, 2, 1};
 
     // генерируем новый список данных для картинки
     // проходимся по каждой строке
@@ -180,6 +180,9 @@ void imageApplySobel(const Image *src, Image *dest)
             dest->m_data[((y - 1) * src->m_width + (x - 1)) * src->m_channels]     = (uint8_t)magnitude;
             dest->m_data[((y - 1) * src->m_width + (x - 1)) * src->m_channels + 1] = (uint8_t)magnitude;
             dest->m_data[((y - 1) * src->m_width + (x - 1)) * src->m_channels + 2] = (uint8_t)magnitude;
+            // Если есть еще альфа канал
+            if(src->m_channels == 4)
+                dest->m_data[((y - 1) * src->m_width + (x - 1)) * src->m_channels + 3] = (uint8_t)magnitude;
         }
     }
     INFOS("Фильтер Собеля применен\n");
