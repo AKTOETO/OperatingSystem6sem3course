@@ -20,7 +20,8 @@ int main(int argc, char **argv)
     imageLoad(&img, input_file);
     imageInfo(&img);
 
-    imageApplySobel(&img, &img2);
+    //imageApplySobel(&img, &img2);
+    imageApplySobelMt(&img, &img2, 5);
     imageSave(&img2, output_file);
     
     imageFree(&img);

@@ -17,6 +17,8 @@
 #include <errno.h>
 #include <string.h>
 #include <pwd.h>
+#define _REENTRANT
+#include <pthread.h>
 
 #include "utils.h"
 

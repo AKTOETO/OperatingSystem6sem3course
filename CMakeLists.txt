@@ -26,7 +26,7 @@ file(GLOB_RECURSE source CONFIGURE_DEPENDS "src/*.h" "src/*.c")
 # main
 add_executable(main ${source})
 # link stbimage to main with -lm linker flag
-target_link_libraries(main stb m)
+target_link_libraries(main stb m pthread)
 
 # if debug add flags
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
