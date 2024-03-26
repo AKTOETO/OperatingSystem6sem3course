@@ -155,9 +155,9 @@ int main(int argc, char **argv)
 
     INFO("Размер выходного буфера 1: %ld\n", data.m_data_size);
     INFO("Размер выходного буфера 2: %ld\n", key.m_data_size);
-    data.m_data[data.m_data_size] = '\0';
+    //data.m_data[data.m_data_size - 1] = '\0';
     key.m_data[key.m_data_size] = '\0';
-    INFO("СЧИТАННЫЕ БУФЕРЫ:\n\n<%s>\n\n", data.m_data);
+    //INFO("СЧИТАННЫЕ БУФЕРЫ:\n\n<%s>\n\n", data.m_data);
     INFO("СЧИТАННЫЕ БУФЕРЫ:\n\n<%s>\n\n", key.m_data);
 
     // выполнение операции xor

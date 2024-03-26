@@ -17,7 +17,7 @@ typedef struct
 // длина сообщения
 #define MSG_LEN (sizeof(msg_t) - sizeof(long))
 
-// чтение буфера из файла
+// чтение буфера из файла 
 ssize_t msgReadBufer(File *f, msg_t *msg);
 
 // закрыть очередь

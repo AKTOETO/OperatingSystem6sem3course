@@ -127,7 +127,7 @@ int main(int argc, char **argv)
     INFO("g_chars_size: <%ld>\n", g_chars_size);
     INFO("  g_key size: <%ld>\n", g_key_size);
     INFO("  g_filename: <%s>\n", g_filename);
-    INFO("       g_key: <%s>\n", g_key);
+    //INFO("       g_key: <%s>\n", g_key);
     INFO("  g_key_size: <%ld>\n", g_key_size);
 
     // установка буфера для файла
