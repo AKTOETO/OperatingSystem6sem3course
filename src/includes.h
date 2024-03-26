@@ -17,10 +17,10 @@
 #include <errno.h>
 #include <string.h>
 #include <pwd.h>
-#define _REENTRANT
 #include <pthread.h>
 
-#include "utils.h"
+// #include "utils.h"
+// #include "constants.h"
 
 #include "stb_image.h"
 #include "stb_image_write.h"

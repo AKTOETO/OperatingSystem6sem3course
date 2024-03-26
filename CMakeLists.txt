@@ -9,8 +9,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED True)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lm")
-set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -lm")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -pthread")
 
 # path to all bins
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -25,8 +25,9 @@ file(GLOB_RECURSE source CONFIGURE_DEPENDS "src/*.h" "src/*.c")
 
 # main
 add_executable(main ${source})
+
 # link stbimage to main with -lm linker flag
-target_link_libraries(main stb m pthread)
+target_link_libraries(main PRIVATE stb m pthread)
 
 # if debug add flags
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

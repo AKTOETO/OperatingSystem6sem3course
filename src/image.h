@@ -1,8 +1,7 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
-#include "errors.h"
-
+#include "utils.h"
 
 // перечисление для отследивания того, что создал картинку
 enum AllocType

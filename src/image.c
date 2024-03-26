@@ -197,13 +197,14 @@ typedef struct
     int m_end_row;      // строка, на которой кончается обработка исходника в текущем потоке
 } ThreadSobelData;
 
+
+// ядра фильтра Собеля
+int kernelX[] = {-1, 0, 1, -2, 0, 2, -1, 0, 1};
+int kernelY[] = {1, 2, 1, 0, 0, 0, -1, -2, -1};
+
 // функция применения фильтра собела для потока
 void *imageThreadApplySobel(void *arg)
 {
-
-    // ядра фильтра Собеля
-    int kernelX[] = {-1, 0, 1, -2, 0, 2, -1, 0, 1};
-    int kernelY[] = {1, 2, 1, 0, 0, 0, -1, -2, -1};
 
     // преобразование типа
     ThreadSobelData *data = (ThreadSobelData *)arg;
@@ -267,11 +268,15 @@ void imageApplySobelMt(const Image *src, Image *dest, int thread_num)
     ThreadSobelData *data = calloc(thread_num, sizeof(ThreadSobelData));
 
     // число строк на поток
+    // если ввести число потоков больше числа строк, то получится,
+    // что на каждый поток в среднем призодится по 0 строк
+    // такого не должно быть
+    if(thread_num > src->m_height) thread_num = src->m_height;
     int numb_of_rows_per_thread = src->m_height / thread_num;
 
     INFO("Число строк на поток: %d\n", numb_of_rows_per_thread);
 
-    // запускаем потоки с определенными данными для каждого потока
+    // формирование данных
     for(int i = 0; i < thread_num; i++)
     {
         // информация для потока
@@ -279,8 +284,13 @@ void imageApplySobelMt(const Image *src, Image *dest, int thread_num)
         data[i].m_src = src;
         data[i].m_dest = dest;
         data[i].m_start_row = fmax(i * numb_of_rows_per_thread - 1, 0);
-        data[i].m_end_row = fmin((i + 1) * numb_of_rows_per_thread + 1, src->m_height);
+        data[i].m_end_row =   fmin((i + 1) * numb_of_rows_per_thread + 1, src->m_height);
+    }
+    data[thread_num - 1].m_end_row = src->m_height;
 
+    // запускаем потоки с определенными данными для каждого потока
+    for(int i = 0; i < thread_num; i++)
+    {
         INFO("Поток %d start: %d end: %d\n", i, data[i].m_start_row, data[i].m_end_row);
         
         // запуск потока
