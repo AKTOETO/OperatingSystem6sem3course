@@ -165,7 +165,7 @@ void imageApplySobel(const Image *src, Image *dest)
             {
                 for (int i = -1; i <= 1; i++)
                 {
-                    int index = ((y + j) * src->m_width + (x + i)) * src->m_channels;
+                    int index = fmin(((y + j) * src->m_width + (x + i)) * src->m_channels, src->m_height - 1);
                     gX += src->m_data[index] * kernelX[(j + 1) * 3 + (i + 1)];
                     gY += src->m_data[index] * kernelY[(j + 1) * 3 + (i + 1)];
                 }
@@ -210,7 +210,7 @@ void *imageThreadApplySobel(void *arg)
 
     // генерируем новый список данных для картинки
     // проходимся по каждой строке
-    for (int y = data->m_start_row + 1; y < data->m_end_row; y++)
+    for (int y = data->m_start_row + 1; y < data->m_end_row - 1; y++)
     {
         // проходимся по каждому столбцу
         for (int x = 1; x < data->m_src->m_width - 1; x++)
@@ -223,7 +223,8 @@ void *imageThreadApplySobel(void *arg)
             {
                 for (int i = -1; i <= 1; i++)
                 {
-                    int index = ((y + j) * data->m_src->m_width + (x + i)) * data->m_src->m_channels;
+                    int index = fmin(((y + j) * data->m_src->m_width + (x + i)) * data->m_src->m_channels,
+                                     data->m_src->m_size);
                     gX += data->m_src->m_data[index] * kernelX[(j + 1) * 3 + (i + 1)];
                     gY += data->m_src->m_data[index] * kernelY[(j + 1) * 3 + (i + 1)];
                 }
@@ -277,8 +278,8 @@ void imageApplySobelMt(const Image *src, Image *dest, int thread_num)
         
         data[i].m_src = src;
         data[i].m_dest = dest;
-        data[i].m_start_row = i * numb_of_rows_per_thread;
-        data[i].m_end_row = (i + 1) * numb_of_rows_per_thread;
+        data[i].m_start_row = fmax(i * numb_of_rows_per_thread - 1, 0);
+        data[i].m_end_row = fmin((i + 1) * numb_of_rows_per_thread + 1, src->m_height);
 
         INFO("Поток %d start: %d end: %d\n", i, data[i].m_start_row, data[i].m_end_row);
         
