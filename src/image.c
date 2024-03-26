@@ -165,7 +165,7 @@ void imageApplySobel(const Image *src, Image *dest)
             {
                 for (int i = -1; i <= 1; i++)
                 {
-                    int index = fmin(((y + j) * src->m_width + (x + i)) * src->m_channels, src->m_height - 1);
+                    int index = fmin(((y + j) * src->m_width + (x + i)) * src->m_channels, src->m_size);
                     gX += src->m_data[index] * kernelX[(j + 1) * 3 + (i + 1)];
                     gY += src->m_data[index] * kernelY[(j + 1) * 3 + (i + 1)];
                 }
@@ -272,7 +272,7 @@ void imageApplySobelMt(const Image *src, Image *dest, int thread_num)
     // что на каждый поток в среднем призодится по 0 строк
     // такого не должно быть
     if(thread_num > src->m_height) thread_num = src->m_height;
-    int numb_of_rows_per_thread = src->m_height / thread_num;
+    int numb_of_rows_per_thread = (src->m_height)/ thread_num;
 
     INFO("Число строк на поток: %d\n", numb_of_rows_per_thread);
 
