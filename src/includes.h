@@ -18,12 +18,13 @@
 #include <string.h>
 #include <pwd.h>
 #include <pthread.h>
+#include <semaphore.h>
 
 // #include "utils.h"
 // #include "constants.h"
 
-#include "stb_image.h"
-#include "stb_image_write.h"
-#include "stb_image_resize2.h"
+// #include "stb_image.h"
+// #include "stb_image_write.h"
+// #include "stb_image_resize2.h"
 
 #endif // !INCLUDES_H

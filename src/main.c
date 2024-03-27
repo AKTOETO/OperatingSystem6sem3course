@@ -1,34 +1,74 @@
-#include "image.h"
+#include "includes.h"
 
-int main(int argc, char **argv)
-{
-    //char *input_file = g_in_file;
-    //char *output_file = g_out_file;
-//
-    //// если введен входной файл
-    //if(argc > 1)
-    //    input_file = argv[1];
-    //
-    //// если введен выходной файл
-    //if(argc > 2)
-    //    output_file = argv[2];
+#define MAX_FLOORS 10
 
-    processARGV(argc, argv);
+typedef struct {
+    int current_floor;
+    int target_floor;
+    int direction; // 1 - вверх, -1 - вниз
+    sem_t mutex;
+    sem_t move;
+} Elevator;
 
-    Image img, img2;
-    imageLoad(&img, g_in_file);
-    if(g_use_info)
-        imageInfo(&img);
+Elevator elevator = {0, 0, 1, 1, 0};
 
-    //imageApplySobel(&img, &img2);
-    if(g_thread_numbers == 1)
-        imageApplySobel(&img, &img2);
-    else
-        imageApplySobelMt(&img, &img2, g_thread_numbers);
-    imageSave(&img2, g_out_file);
+void callElevator(int floor, int direction) {
+    sem_wait(&elevator.mutex);
+    if (elevator.direction == direction || elevator.direction == 0) {
+        elevator.direction = direction;
+        elevator.target_floor = floor;
+    }
+    sem_post(&elevator.mutex);
+    sem_post(&elevator.move);
+}
+
+void moveElevator(int target_floor) {
+    if (elevator.current_floor < target_floor) {
+        while (elevator.current_floor != target_floor) {
+            printf("Лифт движется вверх, текущий этаж: %d\n", ++elevator.current_floor);
+        }
+    } else {
+        while (elevator.current_floor != target_floor) {
+            printf("Лифт движется вниз, текущий этаж: %d\n", --elevator.current_floor);
+        }
+    }
+}
+
+void *elevatorThread(void *args) {
+    while (1) {
+        sem_wait(&elevator.move);
+        sem_wait(&elevator.mutex);
+        
+        if (elevator.current_floor == elevator.target_floor) {
+            if (elevator.direction == 1) {
+                elevator.direction = -1;
+            } else if (elevator.direction == -1) {
+                elevator.direction = 1;
+            }
+        }
+        
+        moveElevator(elevator.target_floor);
+        
+        sem_post(&elevator.mutex);
+    }
+}
+
+int main() {
+    sem_init(&elevator.mutex, 0, 1);
+    sem_init(&elevator.move, 0, 0);
     
-    imageFree(&img);
-    imageFree(&img2);
-
+    pthread_t elevator_thread;
+    pthread_create(&elevator_thread, NULL, elevatorThread, NULL);
+    
+    callElevator(5, 1);
+    //callElevator(2, -1);
+    //callElevator(8, 1);
+    
+    pthread_join(elevator_thread, NULL);
+    
+    sem_destroy(&elevator.mutex);
+    sem_destroy(&elevator.move);
+    
     return 0;
 }
+
